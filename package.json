@@ -1,0 +1,24 @@
+{
+  "name": "overseer",
+  "version": "1.0.0",
+  "description": "lightweight personal url monitoring",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dantheuber/overseer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dantheuber/overseer/issues"
+  },
+  "homepage": "https://github.com/dantheuber/overseer#readme",
+  "dependencies": {
+    "mongoose": "^6.0.11",
+    "node-fetch": "^3.0.0"
+  }
+}
