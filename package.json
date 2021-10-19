@@ -29,9 +29,10 @@
     "@aws-cdk/aws-sqs": "^1.128.0",
     "@aws-cdk/core": "^1.128.0",
     "aws-cdk": "^1.128.0",
-    "aws-sdk": "^2.1009.0"
+    "aws-sdk": "^2.1009.0",
+    "dotenv": "^10.0.0"
   },
   "dependencies": {
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^2.0.0"
   }
 }

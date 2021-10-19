@@ -38,4 +38,5 @@ COPY --from=lib /src/lib /cdk/functions/populate-checkup-queue/lib/
 
 ADD ./infrastructure/ ./infrastructure/
 ADD ./cdk.json .
+ADD ./.env .
 ENTRYPOINT [ "cdk" ]

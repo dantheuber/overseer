@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const AWS = require('aws-sdk');
 
 let ddb;
@@ -16,7 +17,17 @@ const getSqs = () => {
   return sqs;
 };
 
+const alertDiscord = async (content = `Testing :one: :two: :three:`) => await fetch(process.env.DISCORD_WEBHOOK_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    content
+  }),
+});
+
+
 module.exports = {
+  alertDiscord,
   getDynamoClient,
   getSqs,
 };

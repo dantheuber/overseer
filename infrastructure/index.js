@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const cdk = require('@aws-cdk/core');
 const { App } = require('./stacks/app.js');
-
+require('dotenv').config();
 const region = process.env.AWS_REGION || 'us-west-1';
 
 AWS.config.update({ region });

@@ -59,6 +59,7 @@ class App extends Stack {
     const alertDownLambda = new OverseerLambda(this, 'alert-down', {
       lambdaName: 'alert-down',
       environment: {
+        DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
         TABLE_NAME: tableName,
       },
       source: alertQueue,
