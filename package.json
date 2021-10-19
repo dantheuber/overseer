@@ -17,8 +17,22 @@
     "url": "https://github.com/dantheuber/overseer/issues"
   },
   "homepage": "https://github.com/dantheuber/overseer#readme",
+  "devDependencies": {
+    "@aws-cdk/aws-dynamodb": "^1.128.0",
+    "@aws-cdk/aws-events": "^1.128.0",
+    "@aws-cdk/aws-events-targets": "^1.128.0",
+    "@aws-cdk/aws-iam": "^1.128.0",
+    "@aws-cdk/aws-lambda": "^1.128.0",
+    "@aws-cdk/aws-lambda-event-sources": "^1.128.0",
+    "@aws-cdk/aws-lambda-nodejs": "^1.128.0",
+    "@aws-cdk/aws-sns": "^1.128.0",
+    "@aws-cdk/aws-sns-subscriptions": "^1.128.0",
+    "@aws-cdk/aws-sqs": "^1.128.0",
+    "@aws-cdk/core": "^1.128.0",
+    "aws-cdk": "^1.128.0",
+    "aws-sdk": "^2.1009.0"
+  },
   "dependencies": {
-    "mongoose": "^6.0.11",
     "node-fetch": "^3.0.0"
   }
 }
