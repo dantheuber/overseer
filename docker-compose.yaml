@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  cdk:
+    build:
+      context: .
+      target: deploy
+    secrets:
+      - source: aws_credentials
+        target: /root/.aws/credentials
+      - source: aws_config
+        target: /root/.aws/config
+
+secrets:
+  aws_credentials:
+    file: ~/.aws/credentials
+  aws_config:
+    file: ~/.aws/config

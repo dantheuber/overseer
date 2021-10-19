@@ -1,5 +1,6 @@
-import AWS from 'aws-sdk';
-import cdk from '@aws-cdk/core';
+const AWS = require('aws-sdk');
+const cdk = require('@aws-cdk/core');
+const { App } = require('./stacks/app.js');
 
 const region = process.env.AWS_REGION || 'us-west-1';
 

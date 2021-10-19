@@ -1,11 +1,11 @@
-import { getDynamoClient, getSqs } from '../lib/util';
+const { getDynamoClient, getSqs } = require('./lib/util');
 
-export const handler = async (event) => {
+const handler = async (event) => {
   console.log(event);
   const sqs = getSqs();
   const ddb = getDynamoClient();
   const params = { TableName: process.env.TABLE_NAME };
-  const items;
+  let items;
   do {
     items = await ddb.scan(params).promise();
     await Promise.all(items.Items.map(async (item) => 
@@ -16,4 +16,6 @@ export const handler = async (event) => {
     ));
   } while (typeof items.LastEvaluatedKey !== 'undefined');
   console.log('done');
-}
+};
+
+module.exports = { handler };

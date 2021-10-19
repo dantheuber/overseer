@@ -1,7 +1,7 @@
-import { Construct, RemovalPolicy } from '@aws-cdk/core';
-import { Table, AttributeType, BillingMode } from '@aws-cdk/aws-dynamodb';
+const { Construct, RemovalPolicy } = require('@aws-cdk/core');
+const { Table, AttributeType, BillingMode } = require('@aws-cdk/aws-dynamodb');
 
-export class Database extends Construct {
+class Database extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
     
@@ -14,7 +14,7 @@ export class Database extends Construct {
         name: 'url',
         type: AttributeType.STRING,
       },
-      removalPolicy: RemovalPolicy.SNAPSHOT,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
     this.table.addGlobalSecondaryIndex({
       indexName: 'status',
@@ -28,3 +28,5 @@ export class Database extends Construct {
     return this.table;
   }
 }
+
+module.exports = { Database };

@@ -1,7 +1,7 @@
-import AWS from 'aws-sdk';
+const AWS = require('aws-sdk');
 
 let ddb;
-export const getDynamoClient = () => {
+const getDynamoClient = () => {
   if (!ddb) {
     ddb = new AWS.DynamoDB.DocumentClient();
   }
@@ -9,9 +9,14 @@ export const getDynamoClient = () => {
 };
 
 let sqs;
-export const getSqs = () => {
+const getSqs = () => {
   if (!sqs) {
     sqs = new AWS.SQS();
   }
   return sqs;
+};
+
+module.exports = {
+  getDynamoClient,
+  getSqs,
 };

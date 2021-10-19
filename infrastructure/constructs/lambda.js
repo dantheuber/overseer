@@ -1,15 +1,17 @@
-import { Construct, Duration } from '@aws-cdk/core';
-import { SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
-import { LambdaFunction } from '@aws-cdk/aws-events-targets';
-import { Rule } from '@aws-cdk/aws-events';
-import iam from '@aws-cdk/aws-iam';
+const { Construct, Duration } = require('@aws-cdk/core');
+const { Function, Code, Runtime } = require('@aws-cdk/aws-lambda');
+const { SqsEventSource } = require('@aws-cdk/aws-lambda-event-sources');
+const { LambdaFunction } = require('@aws-cdk/aws-events-targets');
+const { Rule, Schedule } = require('@aws-cdk/aws-events');
+const iam = require('@aws-cdk/aws-iam');
+const path = require('path');
 
 const defaultOptions = {
   memorySize: 256,
-  timeout: Duration.seconds(300),
+  timeout: Duration.seconds(30),
 };
 
-export class LambdaRole extends Construct {
+class LambdaRole extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
 
@@ -55,7 +57,7 @@ export class LambdaRole extends Construct {
   }
 }
 
-export class OverseerLambda extends Construct {
+class OverseerLambda extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
     const { role, environment, lambdaName, source } = options;
@@ -72,7 +74,7 @@ export class OverseerLambda extends Construct {
       ...defaultOptions,
     });
     if (source) {
-      this.lambda.addEventSource(new SqsEventSource(source));
+      this.lambda.addEventSource(new SqsEventSource(source, { batchSize: 10 }));
     }
   }
   getLambda() {
@@ -80,7 +82,7 @@ export class OverseerLambda extends Construct {
   }
 }
 
-export class ScheduledLambda extends Construct {
+class ScheduledLambda extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
     const { lambdaName, environment, rate, role } = options;
@@ -108,3 +110,9 @@ export class ScheduledLambda extends Construct {
     return this.eventRule;
   }
 }
+
+module.exports = {
+  LambdaRole,
+  ScheduledLambda,
+  OverseerLambda,
+};

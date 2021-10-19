@@ -1,24 +1,23 @@
-import { Stack } from '@aws-cdk/core';
-import { Queue } from '../constructs/sqs';
-import { Topic } from '../constructs/sns';
-import { Database } from '../constructs/dynamo';
-import { ScheduledLambda, LambdaRole, OverseerLambda } from '../constructs/lambdas';
-import { OverseerLambda } from '../constructs/lambda';
+const { Stack } = require('@aws-cdk/core');
+const { Sqs } = require('../constructs/sqs.js');
+const { Sns } = require('../constructs/sns.js');
+const { Database } = require('../constructs/dynamo.js');
+const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/lambda.js');
 
-export class App extends Stack {
+class App extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
     const { env } = props;
 
-    const sqs = new Queue(this, 'sqs-queue', { env });
+    const sqs = new Sqs(this, 'sqs-queue', { env });
     const monitorQueue = sqs.getMonitorQueue();
     const alertQueue = sqs.getAlertQueue();
-    const sns = new Topic(this, 'sns-topic', { env });
+    const sns = new Sns(this, 'sns-topic', { env });
     const topic = sns.getTopic();
 
     const tableName = 'overseen-sites';
 
-    const database = new Database(scope, 'overseer-db', { tableName, env });
+    const database = new Database(this, 'overseer-db', { tableName, env });
     const table = database.getTable();
 
     const lambdaRole = new LambdaRole(this, 'role', {
@@ -28,9 +27,6 @@ export class App extends Stack {
       alertQueue,
       topic,
     });
-    lambdaRole.addDependsOn(database);
-    lambdaRole.addDependsOn(sqs);
-    lambdaRole.addDependsOn(sns);
     
     const role = lambdaRole.getRole();
     
@@ -44,8 +40,8 @@ export class App extends Stack {
       env,
       role,
     });
-    scheduledLambda.addDependsOn(table);
-    scheduledLambda.addDependsOn(monitorQueue);
+    scheduledLambda.node.addDependency(table);
+    scheduledLambda.node.addDependency(monitorQueue);
 
     const checkSiteLambda = new OverseerLambda(this, 'check-site', {
       lambdaName: 'check-site',
@@ -57,7 +53,8 @@ export class App extends Stack {
       role,
       env,
     });
-    checkSiteLambda.addDependsOn(alertQueue);
+    checkSiteLambda.node.addDependency(monitorQueue);
+    checkSiteLambda.node.addDependency(alertQueue);
 
     const alertDownLambda = new OverseerLambda(this, 'alert-down', {
       lambdaName: 'alert-down',
@@ -68,5 +65,8 @@ export class App extends Stack {
       role,
       env,
     });
+    alertDownLambda.node.addDependency(alertQueue);
   };
 }
+
+module.exports = { App };
