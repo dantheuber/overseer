@@ -27,7 +27,7 @@ const handler = async (event) => {
       }).promise();
     }
 
-    if (!site.alerted && results.status !== 200) {
+    if (!site.alerted && results.status >= 500) {
       await ddb.update({
         TableName: process.env.TABLE_NAME,
         Key: { url: site.url },
