@@ -17,7 +17,7 @@ const getSqs = () => {
   return sqs;
 };
 
-const alertDiscord = async (content = `Testing :one: :two: :three:`) => await fetch(process.env.DISCORD_WEBHOOK_URL, {
+const alertDiscord = async content => await fetch(process.env.DISCORD_WEBHOOK_URL, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -25,8 +25,16 @@ const alertDiscord = async (content = `Testing :one: :two: :three:`) => await fe
   }),
 });
 
+const minAgo = (min = 10) => {
+  const now = new Date();
+  return new Date(now.getTime() - min*60000).getTime();
+};
+const shouldAlert = (results, site) =>
+  (results.status >= 500 && (!site.alerted || site.alertedTime <= minAgo(site.minBetweenAlerts)))
+  || (site.status === 'down' && results.status < 500);
 
 module.exports = {
+  shouldAlert,
   alertDiscord,
   getDynamoClient,
   getSqs,
