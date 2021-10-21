@@ -17,6 +17,14 @@ const getSqs = () => {
   return sqs;
 };
 
+let sns;
+const getSns = () => {
+  if (!sns) {
+    sns = new AWS.SNS();
+  }
+  return sns;
+};
+
 const alertDiscord = async content => await fetch(process.env.DISCORD_WEBHOOK_URL, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -38,4 +46,5 @@ module.exports = {
   alertDiscord,
   getDynamoClient,
   getSqs,
+  getSns,
 };

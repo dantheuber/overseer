@@ -3,11 +3,10 @@ const { alertDiscord, getDynamoClient } = require('./lib/util');
 const handler = async (event) => {
   const ddb = getDynamoClient();
   for await (let item of event.Records) {
-    const parsed = JSON.parse(item.body);
+    const parsed = JSON.parse(item.Sns.Message);
     let status;
     let alerted = true;
     const alertedTime = Date.now();
-    console.log(parsed);
     if (parsed.results.status < 500) {
       await alertDiscord(`:partying_face: ${parsed.site.url} is back up after going down at \`${Date(parsed.site.downTime)}\``);
       alerted = false;
