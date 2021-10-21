@@ -33,6 +33,38 @@ const alertDiscord = async content => await fetch(process.env.DISCORD_WEBHOOK_UR
   }),
 });
 
+const pluralTime = t => t > 1 ? 's': '';
+const timeSince = (date) => {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  let interval = seconds / 31536000;
+  let time = Math.floor(interval);
+  if (interval > 1) {
+    return `${time} year${pluralTime(time)}`;
+  }
+  interval = seconds / 2592000;
+  if (interval > 1) {
+    time = Math.floor(interval);
+    return `${time} month${pluralTime(time)}`;
+  }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    time = Math.floor(interval);
+    return `${time} day${pluralTime(time)}`;
+  }
+  interval = seconds / 3600;
+  if (interval > 1) {
+    time = Math.floor(interval);
+    return `${time} hour${pluralTime(time)}`;
+  }
+  interval = seconds / 60;
+  if (interval > 1) {
+    time = Math.floor(interval);
+    return `${time} minute${pluralTime(time)}`;
+  }
+  time = Math.floor(interval);
+  return `${time} second${pluralTime(time)}`;
+};
+
 const minAgo = (min = 10) => {
   const now = new Date();
   return new Date(now.getTime() - min*60000).getTime();
@@ -47,4 +79,5 @@ module.exports = {
   getDynamoClient,
   getSqs,
   getSns,
+  timeSince,
 };
