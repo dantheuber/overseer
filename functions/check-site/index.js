@@ -1,12 +1,12 @@
 const fetch = require('node-fetch');
 const {
-  getSqs,
+  getSns,
   getDynamoClient,
   shouldAlert,
 } = require('./lib/util');
 
 const handler = async (event) => {
-  const sqs = getSqs();
+  const sns = getSns();
   const ddb = getDynamoClient();
   for await (let item of event.Records) {
     let results;
@@ -18,12 +18,25 @@ const handler = async (event) => {
     }
     
     if (shouldAlert(results, site)) {
-      await sqs.sendMessage({
-        MessageBody: JSON.stringify({
+      await sns.publish({
+        TopicArn: process.env.TOPIC_ARN,
+        Message: JSON.stringify({
           site,
-          results: { ...results, status: results.status },
+          results: {
+            ...results,
+            status: results.status,
+          }
         }),
-        QueueUrl: process.env.QUEUE_URL,
+        MessageAttributes: {
+          SiteStatus: {
+            DataType: 'String',
+            StringValue: results.status < 500 ?  'up':'down',
+          },
+          SiteUrl: {
+            DataType: 'String',
+            StringValue: site.url
+          }
+        },
       }).promise();
     }
 

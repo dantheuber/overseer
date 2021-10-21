@@ -11,7 +11,6 @@ class App extends Stack {
 
     const sqs = new Sqs(this, 'sqs-queue', { env });
     const monitorQueue = sqs.getMonitorQueue();
-    const alertQueue = sqs.getAlertQueue();
     const sns = new Sns(this, 'sns-topic', { env });
     const topic = sns.getTopic();
 
@@ -24,7 +23,6 @@ class App extends Stack {
       env,
       table,
       monitorQueue,
-      alertQueue,
       topic,
     });
     
@@ -47,14 +45,16 @@ class App extends Stack {
       lambdaName: 'check-site',
       environment: {
         TABLE_NAME: tableName,
-        QUEUE_URL: alertQueue.queueUrl,
+        TOPIC_ARN: topic.topicArn,
       },
-      source: monitorQueue,
+      source: {
+        type: 'sqs',
+        item: monitorQueue
+      },
       role,
       env,
     });
     checkSiteLambda.node.addDependency(monitorQueue);
-    checkSiteLambda.node.addDependency(alertQueue);
 
     const alertDownLambda = new OverseerLambda(this, 'alert-down', {
       lambdaName: 'alert-down',
@@ -62,11 +62,12 @@ class App extends Stack {
         DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
         TABLE_NAME: tableName,
       },
-      source: alertQueue,
+      source: { type: 'sns' },
       role,
       env,
     });
-    alertDownLambda.node.addDependency(alertQueue);
+    
+    topic.addSubscription(alertDownLambda.subscription);
   };
 }
 

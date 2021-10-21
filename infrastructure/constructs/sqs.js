@@ -9,17 +9,10 @@ class Sqs extends Construct {
       queueName: 'checkup-queue',
       visibilityTimeout: Duration.seconds(30)
     });
-    this.alertQueue = new Queue(parent, 'alert', {
-      queueName: 'alert-queue',
-      visibilityTimeout: Duration.seconds(30)
-    });
   }
 
   getMonitorQueue() {
     return this.monitorQueue;
-  }
-  getAlertQueue() {
-    return this.alertQueue;
   }
 }
 

@@ -1,5 +1,6 @@
 const { Construct, Duration } = require('@aws-cdk/core');
 const { Function, Code, Runtime } = require('@aws-cdk/aws-lambda');
+const { LambdaSubscription } = require('@aws-cdk/aws-sns-subscriptions');
 const { SqsEventSource } = require('@aws-cdk/aws-lambda-event-sources');
 const { LambdaFunction } = require('@aws-cdk/aws-events-targets');
 const { Rule, Schedule } = require('@aws-cdk/aws-events');
@@ -17,7 +18,6 @@ class LambdaRole extends Construct {
 
     const dbTableArn = options.table.tableArn;
     const monitorQueueArn = options.monitorQueue.queueArn;
-    const alertQueueArn = options.alertQueue.queueArn;
     const snsTopicArn = options.topic.topicArn;
 
     const managedPolicies = [
@@ -34,7 +34,7 @@ class LambdaRole extends Construct {
     document.addStatements(new iam.PolicyStatement({
       actions: ['sqs:*'],
       effect: iam.Effect.ALLOW,
-      resources: [monitorQueueArn, alertQueueArn]
+      resources: [monitorQueueArn]
     }));
     document.addStatements(new iam.PolicyStatement({
       actions: ['sns:*'],
@@ -74,7 +74,11 @@ class OverseerLambda extends Construct {
       ...defaultOptions,
     });
     if (source) {
-      this.lambda.addEventSource(new SqsEventSource(source, { batchSize: 10 }));
+      if (source.type === 'sqs') {
+        this.lambda.addEventSource(new SqsEventSource(source.item, { batchSize: 10 }));
+      } else if (source.type === 'sns') {
+        this.subscription = new LambdaSubscription(this.lambda);
+      }
     }
   }
   getLambda() {
