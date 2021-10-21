@@ -1,4 +1,4 @@
-const { alertDiscord, getDynamoClient } = require('./lib/util');
+const { alertDiscord, getDynamoClient, timeSince } = require('./lib/util');
 
 const handler = async (event) => {
   const ddb = getDynamoClient();
@@ -8,7 +8,7 @@ const handler = async (event) => {
     let alerted = true;
     const alertedTime = Date.now();
     if (status === 'up') {
-      await alertDiscord(`:partying_face: ${parsed.site.url} is back up after going down at \`${Date(parsed.site.downTime)}\``);
+      await alertDiscord(`:partying_face: ${parsed.site.url} is back up after being down for \`${timeSince(parsed.site.downTime)}\``);
       alerted = false;
     } else {
       await alertDiscord(`:fire: ${parsed.site.url} is DOWN! Status: ${parsed.results.status}`);

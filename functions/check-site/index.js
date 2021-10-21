@@ -14,6 +14,8 @@ const handler = async (event) => {
     try {
       results = await fetch(site.url);
     } catch (e) {
+      console.log(`error fetching ${site.url}`);
+      console.error(e);
       results = { status: 500, error: e }
     }
     
