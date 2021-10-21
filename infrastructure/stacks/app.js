@@ -23,7 +23,6 @@ class App extends Stack {
       env,
       table,
       monitorQueue,
-      alertQueue,
       topic,
     });
     

@@ -18,7 +18,6 @@ class LambdaRole extends Construct {
 
     const dbTableArn = options.table.tableArn;
     const monitorQueueArn = options.monitorQueue.queueArn;
-    const alertQueueArn = options.alertQueue.queueArn;
     const snsTopicArn = options.topic.topicArn;
 
     const managedPolicies = [
@@ -35,7 +34,7 @@ class LambdaRole extends Construct {
     document.addStatements(new iam.PolicyStatement({
       actions: ['sqs:*'],
       effect: iam.Effect.ALLOW,
-      resources: [monitorQueueArn, alertQueueArn]
+      resources: [monitorQueueArn]
     }));
     document.addStatements(new iam.PolicyStatement({
       actions: ['sns:*'],
