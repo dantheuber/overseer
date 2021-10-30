@@ -74,10 +74,16 @@ class OverseerLambda extends Construct {
       ...defaultOptions,
     });
     if (source) {
-      if (source.type === 'sqs') {
-        this.lambda.addEventSource(new SqsEventSource(source.item, { batchSize: 10 }));
-      } else if (source.type === 'sns') {
-        this.subscription = new LambdaSubscription(this.lambda);
+      switch (source.type) {
+        case 'sqs': {
+          this.lambda.addEventSource(new SqsEventSource(source.queue, { batchSize: 10 }));
+          break;
+        }
+        case 'sns': {
+          source.topic.addSubscription(new LambdaSubscription(this.lambda));
+          break;
+        }
+        default:
       }
     }
   }

@@ -2,6 +2,7 @@ const { Stack } = require('@aws-cdk/core');
 const { Sqs } = require('../constructs/sqs.js');
 const { Sns } = require('../constructs/sns.js');
 const { Database } = require('../constructs/dynamo.js');
+const { DashboardBucket } = require('../constructs/bucket');
 const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/lambda.js');
 
 class App extends Stack {
@@ -14,6 +15,7 @@ class App extends Stack {
     const sns = new Sns(this, 'sns-topic', { env });
     const topic = sns.getTopic();
 
+    const bucket = new DashboardBucket(this, 'overseer-bucket');
     const tableName = 'overseen-sites';
 
     const database = new Database(this, 'overseer-db', { tableName, env });
@@ -49,7 +51,7 @@ class App extends Stack {
       },
       source: {
         type: 'sqs',
-        item: monitorQueue
+        queue: monitorQueue
       },
       role,
       env,
@@ -62,12 +64,13 @@ class App extends Stack {
         DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
         TABLE_NAME: tableName,
       },
-      source: { type: 'sns' },
+      source: {
+        type: 'sns',
+        topic,
+      },
       role,
       env,
     });
-    
-    topic.addSubscription(alertDownLambda.subscription);
   };
 }
 

@@ -1,3 +1,4 @@
+# Lambda's
 FROM node:14 AS lib
 WORKDIR /src/lib
 ADD ./functions/lib ./
@@ -20,6 +21,13 @@ FROM lambda-build as populate-queue
 ADD ./functions/populate-checkup-queue .
 RUN npm prune --only=prod
 
+# Dashboard
+FROM node:14 AS dashboard-build
+WORKDIR /src
+ADD ./dashboard .
+RUN yarn
+RUN yarn build
+
 # CDK Infrastructure build
 FROM node:14 AS cdk
 RUN npm install -g aws-cdk
@@ -35,6 +43,8 @@ COPY --from=alert-down /src/functions/ /cdk/functions/alert-down/
 COPY --from=lib /src/lib /cdk/functions/alert-down/lib/
 COPY --from=populate-queue /src/functions/ /cdk/functions/populate-checkup-queue
 COPY --from=lib /src/lib /cdk/functions/populate-checkup-queue/lib/
+
+COPY --from=dashboard-build /src/build/ /cdk/dashboard/
 
 ADD ./infrastructure/ ./infrastructure/
 ADD ./cdk.json .

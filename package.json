@@ -33,6 +33,9 @@
     "dotenv": "^10.0.0"
   },
   "dependencies": {
+    "@aws-cdk/aws-cloudfront": "^1.130.0",
+    "@aws-cdk/aws-s3": "^1.130.0",
+    "@aws-cdk/aws-s3-deployment": "^1.130.0",
     "node-fetch": "^2.0.0"
   }
 }
