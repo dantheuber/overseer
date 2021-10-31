@@ -1,18 +1,12 @@
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import { Sites } from './sites/Sites';
 
 function App() {
   return (
     <Container className="App">
-      <Row>
-        <Col>
-          <header className="App-header">
-            Overseer
-          </header>
-        </Col>
-      </Row>
+      <header>
+        <h1>Overseer</h1>
+      </header>
       <Sites />
     </Container>
   );

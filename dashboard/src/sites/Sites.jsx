@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Row from 'react-bootstrap/Row';
-import { NewSiteModal } from './NewSite';
+// import Col from 'react-bootstrap/Col';
+import { SiteModal } from './SiteModal';
 import { Site } from './Site';
 
 export const Sites = () => {
   const [sites, setSites] = useState([]);
   const fetchSites = async () => {
-    const results = await fetch('https://p08oc72u3l.execute-api.us-west-1.amazonaws.com/list-sites');
+    const results = await fetch('https://p08oc72u3l.execute-api.us-west-1.amazonaws.com/list-sites'); // fix this
     const { Items } = await results.json();
     setSites(Items);
   }
@@ -17,8 +18,8 @@ export const Sites = () => {
   }, []);
   return (
     <Row>
-      <NewSiteModal />
-      { sites.map(site => (
+      <SiteModal />
+      { sites.map((site, i) => (
         <Site key={site.url} site={site} />
       ))}
     </Row>
