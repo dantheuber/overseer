@@ -60,14 +60,14 @@ class LambdaRole extends Construct {
 class OverseerLambda extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
-    const { role, environment, lambdaName, source } = options;
+    const { role, environment, lambdaName, source, nameSuffix } = options;
 
-    this.functionName = `overseer-${lambdaName}`;
+    this.functionName = `overseer-${lambdaName}${nameSuffix || ''}`;
 
     this.lambda = new Function(this, name, {
       functionName: this.functionName,
       code: Code.fromAsset(path.join(__dirname, `../../functions/${lambdaName}`)),
-      handler: 'index.handler',
+      handler: options.handler || 'index.handler',
       runtime: Runtime.NODEJS_14_X,
       environment,
       role,

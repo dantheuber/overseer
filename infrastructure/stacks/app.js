@@ -4,6 +4,7 @@ const { Sns } = require('../constructs/sns.js');
 const { Database } = require('../constructs/dynamo.js');
 const { DashboardBucket } = require('../constructs/bucket');
 const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/lambda.js');
+const { RestApi } = require('../constructs/api.js');
 
 class App extends Stack {
   constructor(scope, id, props) {
@@ -15,7 +16,7 @@ class App extends Stack {
     const sns = new Sns(this, 'sns-topic', { env });
     const topic = sns.getTopic();
 
-    const bucket = new DashboardBucket(this, 'overseer-bucket');
+    this.bucket = new DashboardBucket(this, 'overseer-bucket');
     const tableName = 'overseen-sites';
 
     const database = new Database(this, 'overseer-db', { tableName, env });
@@ -71,7 +72,44 @@ class App extends Stack {
       role,
       env,
     });
+    const apiCommonOpts = {
+      lambdaName: 'api-routes',
+      environment: { TABLE_NAME: tableName },
+      role,
+      env,
+    };
+    const getFunction = new OverseerLambda(this, 'get-function', {
+      nameSuffix: '-getsites',
+      handler: 'index.get',
+      ...apiCommonOpts,
+    }).getLambda();
+    const postFunction = new OverseerLambda(this, 'post-function', {      
+      nameSuffix: '-postsite',
+      handler: 'index.post',
+      ...apiCommonOpts,
+    }).getLambda();
+    const putFunction = new OverseerLambda(this, 'put-function', {
+      nameSuffix: '-putsite',
+      handler: 'index.put',
+      ...apiCommonOpts,
+    }).getLambda();
+    const deleteFunction = new OverseerLambda(this, 'delete-function', {
+      nameSuffix: '-deletesite',
+      handler: 'index.delete',
+      ...apiCommonOpts,
+    }).getLambda();
+
+    const restApi = new RestApi(this, 'rest-api', {
+      bucketWebsiteUrl: this.bucket.getBucket().bucketWebsiteUrl,
+      getFunction,
+      postFunction,
+      putFunction,
+      deleteFunction,
+    });
   };
+  getBucketUrl() {
+    return this.bucket.getBucket().bucketWebsiteUrl;
+  }
 }
 
 module.exports = { App };

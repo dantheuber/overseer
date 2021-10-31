@@ -21,6 +21,10 @@ FROM lambda-build as populate-queue
 ADD ./functions/populate-checkup-queue .
 RUN npm prune --only=prod
 
+FROM lambda-build as api-routes
+ADD ./functions/api-routes .
+RUN npm prune --only=prod
+
 # Dashboard
 FROM node:14 AS dashboard-build
 WORKDIR /src
@@ -43,6 +47,8 @@ COPY --from=alert-down /src/functions/ /cdk/functions/alert-down/
 COPY --from=lib /src/lib /cdk/functions/alert-down/lib/
 COPY --from=populate-queue /src/functions/ /cdk/functions/populate-checkup-queue
 COPY --from=lib /src/lib /cdk/functions/populate-checkup-queue/lib/
+COPY --from=api-routes /src/functions/ /cdk/functions/api-routes/
+COPY --from=lib /src/lib /cdk/functions/api-routes/lib/
 
 COPY --from=dashboard-build /src/build/ /cdk/dashboard/
 
