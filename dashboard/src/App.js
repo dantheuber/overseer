@@ -1,25 +1,20 @@
-import logo from './logo.svg';
-import { Example } from './Example';
-import './App.css';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import { Sites } from './sites/Sites';
+
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <Example example={["test", 'another test', 'dj khalid']} />
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Poopy mcpoop
-        </a>
-      </header>
-    </div>
+    <Container className="App">
+      <Row>
+        <Col>
+          <header className="App-header">
+            Overseer
+          </header>
+        </Col>
+      </Row>
+      <Sites />
+    </Container>
   );
 }
 
