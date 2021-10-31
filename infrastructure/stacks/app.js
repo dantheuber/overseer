@@ -106,6 +106,7 @@ class App extends Stack {
       putFunction,
       deleteFunction,
     });
+    restApi.node.addDependency(this.bucket.getBucket());
   };
   getBucketUrl() {
     return this.bucket.getBucket().bucketWebsiteUrl;

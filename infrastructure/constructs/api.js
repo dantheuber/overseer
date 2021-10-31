@@ -10,7 +10,7 @@ class RestApi extends Construct {
     this.api = new HttpApi(parent, 'http-api', {
       apiName: 'overseer-rest-api',
       corsPreflight: {
-        allowOrigins: [`${options.bucketWebsiteUrl}`, 'http://localhost:3000']
+        allowOrigins: [options.bucketWebsiteUrl.replace('-website', ''), 'http://localhost:3000']
       }
     });
     this.api.addRoutes({

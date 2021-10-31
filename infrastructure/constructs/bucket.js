@@ -16,7 +16,6 @@ class DashboardBucket extends Construct {
       publicReadAccess: true,
       websiteIndexDocument: 'index.html',
       encryption: BucketEncryption.S3_MANAGED,
-      enforceSSL: true,
       autoDeleteObjects: true,
       serverAccessLogsBucket: this.logsBucket,
       removalPolicy: RemovalPolicy.DESTROY,
