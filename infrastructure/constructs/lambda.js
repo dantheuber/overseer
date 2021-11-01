@@ -4,6 +4,7 @@ const { LambdaSubscription } = require('@aws-cdk/aws-sns-subscriptions');
 const { SqsEventSource } = require('@aws-cdk/aws-lambda-event-sources');
 const { LambdaFunction } = require('@aws-cdk/aws-events-targets');
 const { Rule, Schedule } = require('@aws-cdk/aws-events');
+const { RetentionDays } = require('@aws-cdk/aws-logs');
 const iam = require('@aws-cdk/aws-iam');
 const path = require('path');
 
@@ -11,6 +12,28 @@ const defaultOptions = {
   memorySize: 256,
   timeout: Duration.seconds(30),
 };
+
+class EdgeLambdaRole extends Construct {
+  constructor(parent, name, options) {
+    super(parent, name, options);
+
+    const managedPolicies = [
+      'service-role/AWSLambdaRole',
+      'service-role/AWSLambdaBasicExecutionRole',
+    ].map(policyName => iam.ManagedPolicy.fromAwsManagedPolicyName(policyName));
+
+    this.role = new iam.Role(parent, 'edge-lambda-role', {
+      managedPolicies,
+      assumedBy: new iam.CompositePrincipal(
+        new iam.ServicePrincipal('lambda.amazonaws.com'),
+        new iam.ServicePrincipal('edgelambda.amazonaws.com')
+      )
+    });
+  }
+  getRole() {
+    return this.role;
+  }
+}
 
 class LambdaRole extends Construct {
   constructor(parent, name, options) {
@@ -27,9 +50,8 @@ class LambdaRole extends Construct {
 
     this.role = new iam.Role(parent, 'lambda-role', {
       managedPolicies,
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
     });
-
     const document = new iam.PolicyDocument();
     document.addStatements(new iam.PolicyStatement({
       actions: ['sqs:*'],
@@ -60,24 +82,31 @@ class LambdaRole extends Construct {
 class OverseerLambda extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
-    const { role, environment, lambdaName, source } = options;
+    const { code, role, environment, lambdaName, source, nameSuffix } = options;
 
-    this.functionName = `overseer-${lambdaName}`;
+    this.functionName = `overseer-${lambdaName}${nameSuffix || ''}`;
 
     this.lambda = new Function(this, name, {
       functionName: this.functionName,
-      code: Code.fromAsset(path.join(__dirname, `../../functions/${lambdaName}`)),
-      handler: 'index.handler',
+      code: code || Code.fromAsset(path.join(__dirname, `../../functions/${lambdaName}`)),
+      handler: options.handler || 'index.handler',
       runtime: Runtime.NODEJS_14_X,
+      logRetention: RetentionDays.ONE_MONTH,
       environment,
       role,
       ...defaultOptions,
     });
     if (source) {
-      if (source.type === 'sqs') {
-        this.lambda.addEventSource(new SqsEventSource(source.item, { batchSize: 10 }));
-      } else if (source.type === 'sns') {
-        this.subscription = new LambdaSubscription(this.lambda);
+      switch (source.type) {
+        case 'sqs': {
+          this.lambda.addEventSource(new SqsEventSource(source.queue, { batchSize: 10 }));
+          break;
+        }
+        case 'sns': {
+          source.topic.addSubscription(new LambdaSubscription(this.lambda));
+          break;
+        }
+        default:
       }
     }
   }
@@ -116,6 +145,7 @@ class ScheduledLambda extends Construct {
 }
 
 module.exports = {
+  EdgeLambdaRole,
   LambdaRole,
   ScheduledLambda,
   OverseerLambda,

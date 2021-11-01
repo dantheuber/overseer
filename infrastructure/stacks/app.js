@@ -1,8 +1,13 @@
+const path = require('path');
 const { Stack } = require('@aws-cdk/core');
+const { StringParameter } = require('@aws-cdk/aws-ssm');
 const { Sqs } = require('../constructs/sqs.js');
 const { Sns } = require('../constructs/sns.js');
 const { Database } = require('../constructs/dynamo.js');
+const { DashboardBucket } = require('../constructs/bucket');
 const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/lambda.js');
+const { RestApi } = require('../constructs/api.js');
+const { Code } = require('@aws-cdk/aws-lambda');
 
 class App extends Stack {
   constructor(scope, id, props) {
@@ -49,7 +54,7 @@ class App extends Stack {
       },
       source: {
         type: 'sqs',
-        item: monitorQueue
+        queue: monitorQueue
       },
       role,
       env,
@@ -59,16 +64,72 @@ class App extends Stack {
     const alertDownLambda = new OverseerLambda(this, 'alert-down', {
       lambdaName: 'alert-down',
       environment: {
+        DASHBOARD_DOMAIN: process.env.DASHBOARD_DOMAIN,
         DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
         TABLE_NAME: tableName,
       },
-      source: { type: 'sns' },
+      source: {
+        type: 'sns',
+        topic,
+      },
       role,
       env,
     });
+    const apiCommonOpts = {
+      lambdaName: 'api-routes',
+      environment: { TABLE_NAME: tableName },
+      code: Code.fromAsset(path.join(__dirname, `../../functions/api-routes`)),
+      role,
+      env,
+    };
+    const getFunction = new OverseerLambda(this, 'get-function', {
+      nameSuffix: '-list-sites',
+      handler: 'index.get',
+      ...apiCommonOpts,
+    }).getLambda();
+    const getSiteFunction = new OverseerLambda(this, 'get-site-function', {
+      nameSuffix: '-get-site',
+      handler: 'index.getSite',
+      ...apiCommonOpts,
+    }).getLambda();
+    const postFunction = new OverseerLambda(this, 'post-function', {      
+      nameSuffix: '-post-site',
+      handler: 'index.post',
+      ...apiCommonOpts,
+    }).getLambda();
+    const putFunction = new OverseerLambda(this, 'put-function', {
+      nameSuffix: '-put-site',
+      handler: 'index.put',
+      ...apiCommonOpts,
+    }).getLambda();
+    const deleteFunction = new OverseerLambda(this, 'delete-function', {
+      nameSuffix: '-delete-site',
+      handler: 'index.delete',
+      ...apiCommonOpts,
+    }).getLambda();
+
+    const restApi = new RestApi(this, 'rest-api', {
+      getFunction,
+      getSiteFunction,
+      postFunction,
+      putFunction,
+      deleteFunction,
+    });
     
-    topic.addSubscription(alertDownLambda.subscription);
+    const ssmParam = new StringParameter(this, 'api-id', {
+      stringValue: restApi.getApi().apiId,
+      parameterName: '/Overseer/RestApiId',
+      description: 'The APIG ID for the overseer rest api',
+    });
+    ssmParam.node.addDependency(restApi.getApi());
+    this.bucket = new DashboardBucket(this, 'overseer-bucket', {
+      api: restApi.getApi(),
+      env,
+    });
   };
+  getBucketUrl() {
+    return this.bucket.getBucket().bucketWebsiteUrl;
+  }
 }
 
 module.exports = { App };

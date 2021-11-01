@@ -7,11 +7,22 @@ const handler = async (event) => {
     const status = item.Sns.MessageAttributes.SiteStatus.Value;
     let alerted = true;
     const alertedTime = Date.now();
-    if (status === 'up') {
-      await alertDiscord(`:partying_face: ${parsed.site.url} is back up after being down for \`${timeSince(parsed.site.downTime)}\``);
-      alerted = false;
-    } else {
-      await alertDiscord(`:fire: ${parsed.site.url} is DOWN! Status: ${parsed.results.status}`);
+
+    if (parsed.site.alertDiscord) {
+      if (status === 'up') {
+        await alertDiscord(
+          `:partying_face: ${parsed.site.label} is back up!`,
+          parsed.site,
+          4506653
+        );
+        alerted = false;
+      } else {
+        await alertDiscord(
+          `:fire: :fire: :fire: ${parsed.site.label} is DOWN! Status: \`${parsed.results.status}\``,
+          parsed.site,
+          15409955
+        );
+      }
     }
 
     await ddb.update({

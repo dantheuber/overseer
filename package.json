@@ -1,6 +1,6 @@
 {
   "name": "overseer",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "lightweight personal url monitoring",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/dantheuber/overseer#readme",
   "devDependencies": {
+    "@aws-cdk/aws-apigatewayv2": "^1.130.0",
+    "@aws-cdk/aws-apigatewayv2-integrations": "^1.130.0",
+    "@aws-cdk/aws-cloudfront": "^1.130.0",
     "@aws-cdk/aws-dynamodb": "^1.128.0",
     "@aws-cdk/aws-events": "^1.128.0",
     "@aws-cdk/aws-events-targets": "^1.128.0",
@@ -24,9 +27,13 @@
     "@aws-cdk/aws-lambda": "^1.128.0",
     "@aws-cdk/aws-lambda-event-sources": "^1.128.0",
     "@aws-cdk/aws-lambda-nodejs": "^1.128.0",
+    "@aws-cdk/aws-logs": "^1.130.0",
+    "@aws-cdk/aws-s3": "^1.130.0",
+    "@aws-cdk/aws-s3-deployment": "^1.130.0",
     "@aws-cdk/aws-sns": "^1.128.0",
     "@aws-cdk/aws-sns-subscriptions": "^1.128.0",
     "@aws-cdk/aws-sqs": "^1.128.0",
+    "@aws-cdk/aws-ssm": "^1.130.0",
     "@aws-cdk/core": "^1.128.0",
     "aws-cdk": "^1.128.0",
     "aws-sdk": "^2.1009.0",
