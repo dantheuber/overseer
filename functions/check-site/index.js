@@ -43,7 +43,7 @@ const handler = async (event) => {
     }
 
     if (!site.alerted && results.status >= 500) {
-      await ddb.update({
+      return await ddb.update({
         TableName: process.env.TABLE_NAME,
         Key: { url: site.url },
         UpdateExpression: 'set #downTime = :dt',
@@ -54,6 +54,21 @@ const handler = async (event) => {
           ':dt': Date.now(),
         },
         ReturnValue: 'UPDATED_NEW',
+      }).promise();
+    }
+
+    // if its a new site with no status and it is up, we should set it as such
+    if (!site.status) {
+      return await ddb.update({
+        TableName: process.env.TABLE_NAME,
+        Key: { url: site.url },
+        UpdateExpression: 'set #st = :st',
+        ExpressionAttributeNames: {
+          '#st': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':st': 'up',
+        },
       }).promise();
     }
   }

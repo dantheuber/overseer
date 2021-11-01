@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Row from 'react-bootstrap/Row';
-// import Col from 'react-bootstrap/Col';
+import Col from 'react-bootstrap/Col';
 import { SiteModal } from './SiteModal';
 import { Site } from './Site';
 
 export const Sites = () => {
+  const modalRef = useRef(null);
   const [sites, setSites] = useState([]);
   const fetchSites = async () => {
     const results = await fetch('/api/list-sites');
@@ -20,12 +21,19 @@ export const Sites = () => {
     const doit = async () => await fetchSites();
     doit();
   }, []);
-  return (
-    <Row>
-      <SiteModal addSite={addSite} />
-      { sites.map((site, i) => (
-        <Site key={site.url} site={site} />
-      ))}
+
+  return ([
+    <Row key="button">
+      <Col>
+        <SiteModal addSite={addSite} modalRef={modalRef} />
+      </Col>
+    </Row>,
+    <Row key="list">
+      { sites.map((site) => (
+        <Col key={site.url} lg="4">
+          <Site site={site} modalRef={modalRef} />
+        </Col>)
+      )}
     </Row>
-  );
+  ]);
 };

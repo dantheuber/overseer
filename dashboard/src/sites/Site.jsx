@@ -1,26 +1,32 @@
 import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 import Card from 'react-bootstrap/Card';
-import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 
-export const Site = ({ site }) => (
-  <Col>
+export const Site = ({ site }) => {
+  const siteDown = site.status === 'down';
+  const deleteSite = async () => {
+    const results = await fetch('/api/site', {
+      method: 'DELETE',
+      body: JSON.stringify(site),
+    });
+    console.log(results.json());
+  };
+  return (
     <Card>
       <Card.Header>
         <Card.Title>
-          {site.label}
+          <Button variant="link" href={site.url} target="_blank">{site.label}</Button>
         </Card.Title>
       </Card.Header>
       {/* <Card.Img variant="top" src="holder.js/100px180" /> */}
       <Card.Body>
-        <Card.Text>
-          { site.description }
-          <Button variant="link" href={site.url} target="_blank">{site.url}</Button>
-          { !site.status || site.status === 'up' && <Alert variant="success">Site is ONLINE</Alert> }
-          { site.status === 'down' && <Alert variant="danger">Site is OFFLINE!</Alert> }
-        </Card.Text>
+        <Card.Text>{ site.description }</Card.Text>
+        <Alert variant={siteDown ? 'danger':'success'}>
+          Site is {siteDown ? 'DOWN':'ONLINE'}!
+        </Alert>
+        <Button onClick={deleteSite} variant="danger">Delete</Button>
       </Card.Body>
     </Card>
-  </Col>
-)
+  );
+};

@@ -37,7 +37,6 @@ export const SiteModal = ({
     });
     const data = await response.json();
     console.log(data);
-    addSite(data.Item);
   };
   
   return [
@@ -91,6 +90,8 @@ export const SiteModal = ({
             <Form.Control
               as="textarea"
               rows={3}
+              name="description"
+              onChange={updateNewSite}
               placeholder="An short description of this site"
             />
             <Form.Text className="text-muted">(Optional)</Form.Text>

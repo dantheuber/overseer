@@ -9,17 +9,16 @@ const formatReturn = (val, statusCode = 200) => ({
 });
 
 exports.get = async () => {
-  const params = {
-    TableName,
-  };
+  const params = { TableName };
   return formatReturn(await ddb.scan(params).promise());
 };
 
 const put = async (event) => {
-  console.log(event);
+  const Item = JSON.parse(event.body);
   const params = {
     TableName,
-    Item: JSON.parse(event.body),
+    Item,
+    ReturnValues: 'ALL_OLD',
   };
   return formatReturn(await ddb.put(params).promise());
 };

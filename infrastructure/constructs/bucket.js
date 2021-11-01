@@ -5,13 +5,12 @@ const { Bucket, BucketEncryption, HttpMethods } = require('@aws-cdk/aws-s3');
 const { BucketDeployment, Source } = require('@aws-cdk/aws-s3-deployment');
 const { Runtime, Code, Function } = require('@aws-cdk/aws-lambda');
 const {
-  OriginAccessIdentity,
-  CloudFrontWebDistribution,
-  ViewerProtocolPolicy,
   PriceClass,
-  CloudFrontAllowedMethods,
   LambdaEdgeEventType,
-  ViewerCertificate
+  OriginAccessIdentity,
+  ViewerProtocolPolicy,
+  CloudFrontAllowedMethods,
+  CloudFrontWebDistribution,
 } = require('@aws-cdk/aws-cloudfront');
 const { EdgeLambdaRole } = require('./lambda');
 
