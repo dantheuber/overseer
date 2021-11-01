@@ -12,6 +12,28 @@ const defaultOptions = {
   timeout: Duration.seconds(30),
 };
 
+class EdgeLambdaRole extends Construct {
+  constructor(parent, name, options) {
+    super(parent, name, options);
+
+    const managedPolicies = [
+      'service-role/AWSLambdaRole',
+      'service-role/AWSLambdaBasicExecutionRole',
+    ].map(policyName => iam.ManagedPolicy.fromAwsManagedPolicyName(policyName));
+
+    this.role = new iam.Role(parent, 'edge-lambda-role', {
+      managedPolicies,
+      assumedBy: new iam.CompositePrincipal(
+        new iam.ServicePrincipal('lambda.amazonaws.com'),
+        new iam.ServicePrincipal('edgelambda.amazonaws.com')
+      )
+    });
+  }
+  getRole() {
+    return this.role;
+  }
+}
+
 class LambdaRole extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
@@ -27,9 +49,8 @@ class LambdaRole extends Construct {
 
     this.role = new iam.Role(parent, 'lambda-role', {
       managedPolicies,
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
     });
-
     const document = new iam.PolicyDocument();
     document.addStatements(new iam.PolicyStatement({
       actions: ['sqs:*'],
@@ -122,6 +143,7 @@ class ScheduledLambda extends Construct {
 }
 
 module.exports = {
+  EdgeLambdaRole,
   LambdaRole,
   ScheduledLambda,
   OverseerLambda,

@@ -1,4 +1,5 @@
 const { Stack } = require('@aws-cdk/core');
+const { StringParameter } = require('@aws-cdk/aws-ssm');
 const { Sqs } = require('../constructs/sqs.js');
 const { Sns } = require('../constructs/sns.js');
 const { Database } = require('../constructs/dynamo.js');
@@ -16,7 +17,6 @@ class App extends Stack {
     const sns = new Sns(this, 'sns-topic', { env });
     const topic = sns.getTopic();
 
-    this.bucket = new DashboardBucket(this, 'overseer-bucket');
     const tableName = 'overseen-sites';
 
     const database = new Database(this, 'overseer-db', { tableName, env });
@@ -100,13 +100,22 @@ class App extends Stack {
     }).getLambda();
 
     const restApi = new RestApi(this, 'rest-api', {
-      bucketWebsiteUrl: this.bucket.getBucket().bucketWebsiteUrl,
       getFunction,
       postFunction,
       putFunction,
       deleteFunction,
     });
-    restApi.node.addDependency(this.bucket.getBucket());
+    
+    const ssmParam = new StringParameter(this, 'api-id', {
+      stringValue: restApi.getApi().apiId,
+      parameterName: '/Overseer/RestApiId',
+      description: 'The APIG ID for the overseer rest api',
+    });
+    ssmParam.node.addDependency(restApi.getApi());
+    this.bucket = new DashboardBucket(this, 'overseer-bucket', {
+      api: restApi.getApi(),
+      env,
+    });
   };
   getBucketUrl() {
     return this.bucket.getBucket().bucketWebsiteUrl;

@@ -41,6 +41,7 @@ WORKDIR /cdk
 ADD ./package*.json ./
 RUN npm install ./
 
+
 COPY --from=check-site /src/functions/ /cdk/functions/check-site/
 COPY --from=lib /src/lib /cdk/functions/check-site/lib/
 COPY --from=alert-down /src/functions/ /cdk/functions/alert-down/
@@ -52,6 +53,7 @@ COPY --from=lib /src/lib /cdk/functions/api-routes/lib/
 
 COPY --from=dashboard-build /src/build/ /cdk/dashboard/
 
+ADD ./functions/redirect ./functions/redirect
 ADD ./infrastructure/ ./infrastructure/
 ADD ./cdk.json .
 ADD ./.env .

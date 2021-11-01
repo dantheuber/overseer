@@ -2,10 +2,10 @@ const AWS = require('aws-sdk');
 const cdk = require('@aws-cdk/core');
 const { App } = require('./stacks/app.js');
 require('dotenv').config();
-const region = process.env.AWS_REGION || 'us-west-1';
+const region = process.env.AWS_REGION || 'us-east-1';
 
 AWS.config.update({ region });
-
+console.log(`Deploying to ${region}`);
 async function build() {
   const sts = new AWS.STS();
   const app = new cdk.App();

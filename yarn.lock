@@ -1016,7 +1016,7 @@
     "@aws-cdk/core" "1.128.0"
     constructs "^3.3.69"
 
-"@aws-cdk/aws-ssm@1.130.0":
+"@aws-cdk/aws-ssm@1.130.0", "@aws-cdk/aws-ssm@^1.130.0":
   version "1.130.0"
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-ssm/-/aws-ssm-1.130.0.tgz#e3a5202f7fb66e8c783b1ff58d30030aceed5d91"
   integrity sha512-93q58dcxt0r9FB5B8ceg7JhqfSx3XCG7uNSTDq6MzIIq4hcRDvahneS4TiMOzYdVuLAXCYE13GZXxQSSQ0TAgQ==

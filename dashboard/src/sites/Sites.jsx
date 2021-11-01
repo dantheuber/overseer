@@ -7,10 +7,14 @@ import { Site } from './Site';
 export const Sites = () => {
   const [sites, setSites] = useState([]);
   const fetchSites = async () => {
-    const results = await fetch('https://p08oc72u3l.execute-api.us-west-1.amazonaws.com/list-sites'); // fix this
+    const results = await fetch('/api/list-sites');
     const { Items } = await results.json();
     setSites(Items);
-  }
+  };
+
+  const addSite = (site) => {
+    setSites([site, ...sites]);
+  };
   useEffect(() => {
     setInterval(fetchSites, 1000 * 60);
     const doit = async () => await fetchSites();
@@ -18,7 +22,7 @@ export const Sites = () => {
   }, []);
   return (
     <Row>
-      <SiteModal />
+      <SiteModal addSite={addSite} />
       { sites.map((site, i) => (
         <Site key={site.url} site={site} />
       ))}

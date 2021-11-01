@@ -4,7 +4,11 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-export const SiteModal = ({ site, modifyExisting }) => {
+export const SiteModal = ({
+  site,
+  addSite,
+  modifyExisting
+}) => {
   const formRef = useRef(null);
   const [show, setShow] = useState(false);
   const [validated, setValidated] = useState(false);
@@ -21,12 +25,19 @@ export const SiteModal = ({ site, modifyExisting }) => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const form = formRef.current;
     const isValid = form.checkValidity();
     setValidated(true);
     if (!isValid) return;
-    console.log('submitting', newSite);
+    const response = await fetch('/api/site', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSite),
+    });
+    const data = await response.json();
+    console.log(data);
+    addSite(data.Item);
   };
   
   return [
@@ -80,8 +91,9 @@ export const SiteModal = ({ site, modifyExisting }) => {
             <Form.Control
               as="textarea"
               rows={3}
-              placeholder="An optional short description of this site"
+              placeholder="An short description of this site"
             />
+            <Form.Text className="text-muted">(Optional)</Form.Text>
           </Form.Group>
         </Form>
       </Modal.Body>
@@ -93,6 +105,7 @@ export const SiteModal = ({ site, modifyExisting }) => {
   ]
 }
 SiteModal.propTypes = {
+  addSite: PropTypes.func.isRequired,
   site: PropTypes.object,
 };
 SiteModal.defaultProps = {

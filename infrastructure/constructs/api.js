@@ -5,31 +5,37 @@ const { LambdaProxyIntegration } = require('@aws-cdk/aws-apigatewayv2-integratio
 class RestApi extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
-    const { getFunction, postFunction, putFunction, deleteFunction } = options;
+    const {
+      getFunction,
+      postFunction,
+      putFunction,
+      deleteFunction,
+    } = options;
+
 
     this.api = new HttpApi(parent, 'http-api', {
       apiName: 'overseer-rest-api',
       corsPreflight: {
-        allowOrigins: [options.bucketWebsiteUrl.replace('-website', ''), 'http://localhost:3000']
+        allowOrigins: ['http://localhost:3000']
       }
     });
     this.api.addRoutes({
-      path: '/list-sites',
+      path: '/api/list-sites',
       methods: [HttpMethod.GET],
       integration: new LambdaProxyIntegration({ handler: getFunction }),
     });
     this.api.addRoutes({
-      path: '/site',
+      path: '/api/site',
       methods: [HttpMethod.POST],
       integration: new LambdaProxyIntegration({ handler: postFunction }),
     });
     this.api.addRoutes({
-      path: '/site',
+      path: '/api/site',
       methods: [HttpMethod.PUT],
       integration: new LambdaProxyIntegration({ handler: putFunction }),
     });
     this.api.addRoutes({
-      path: '/site',
+      path: '/api/site',
       methods: [HttpMethod.DELETE],
       integration: new LambdaProxyIntegration({ handler: deleteFunction }),
     });
