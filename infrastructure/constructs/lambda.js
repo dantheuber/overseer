@@ -4,6 +4,7 @@ const { LambdaSubscription } = require('@aws-cdk/aws-sns-subscriptions');
 const { SqsEventSource } = require('@aws-cdk/aws-lambda-event-sources');
 const { LambdaFunction } = require('@aws-cdk/aws-events-targets');
 const { Rule, Schedule } = require('@aws-cdk/aws-events');
+const { RetentionDays } = require('@aws-cdk/aws-logs');
 const iam = require('@aws-cdk/aws-iam');
 const path = require('path');
 
@@ -81,15 +82,16 @@ class LambdaRole extends Construct {
 class OverseerLambda extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
-    const { role, environment, lambdaName, source, nameSuffix } = options;
+    const { code, role, environment, lambdaName, source, nameSuffix } = options;
 
     this.functionName = `overseer-${lambdaName}${nameSuffix || ''}`;
 
     this.lambda = new Function(this, name, {
       functionName: this.functionName,
-      code: Code.fromAsset(path.join(__dirname, `../../functions/${lambdaName}`)),
+      code: code || Code.fromAsset(path.join(__dirname, `../../functions/${lambdaName}`)),
       handler: options.handler || 'index.handler',
       runtime: Runtime.NODEJS_14_X,
+      logRetention: RetentionDays.ONE_MONTH,
       environment,
       role,
       ...defaultOptions,

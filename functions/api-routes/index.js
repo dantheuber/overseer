@@ -1,37 +1,52 @@
 const { getDynamoClient } = require('./lib/util');
+const { unprocessableResponse, jsonResponse } = require('./lib/apig');
+const { DEFAULT_NEW_SITE } = require('./constants');
 
 const TableName = process.env.TABLE_NAME;
 const ddb = getDynamoClient();
 
-const formatReturn = (val, statusCode = 200) => ({
-  body: JSON.stringify(val, null, 2),
-  statusCode,
-});
+exports.getSite = async (event) => {
+  if (!event.queryStringParameters.url) {
+    return unprocessableResponse({ msg: 'Must provide URL' });
+  }
+  const params = {
+    TableName,
+    Key: { url: event.queryStringParameters.url }
+  };
+  return jsonResponse(await ddb.query(params).promise());
+};
 
 exports.get = async () => {
   const params = { TableName };
-  return formatReturn(await ddb.scan(params).promise());
+  return jsonResponse(await ddb.scan(params).promise());
 };
 
 const put = async (event) => {
-  const Item = JSON.parse(event.body);
+  console.log(event);
+  const body = JSON.parse(event.body);
+  const Item = {
+    ...DEFAULT_NEW_SITE,
+    ...body,
+  }
+  console.log(Item);
   const params = {
     TableName,
     Item,
     ReturnValues: 'ALL_OLD',
   };
-  return formatReturn(await ddb.put(params).promise());
+  return jsonResponse(await ddb.put(params).promise().then((() => ({ ...Item }))));
 };
 
 exports.post = put;
 exports.put = put;
 
-exports.delete = async (event, context) => {
-  const site = JSON.parse(event.body);
-  console.log(site, context);
+exports.delete = async (event) => {
+  if (!event.queryStringParameters.url) {
+    return unprocessableResponse({ msg: 'Must provide URL' });
+  }
   const params = {
     TableName,
-    Key: { url: site.url }
+    Key: { url: event.queryStringParameters.url }
   };
-  return formatReturn(await ddb.delete(params).promise());
+  return jsonResponse(await ddb.delete(params).promise());
 };

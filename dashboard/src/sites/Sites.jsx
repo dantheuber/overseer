@@ -14,7 +14,7 @@ export const Sites = () => {
   };
 
   const addSite = (site) => {
-    setSites([site, ...sites]);
+    setSites([...sites, site]);
   };
   useEffect(() => {
     setInterval(fetchSites, 1000 * 60);

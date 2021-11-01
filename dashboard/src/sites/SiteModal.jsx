@@ -36,7 +36,8 @@ export const SiteModal = ({
       body: JSON.stringify(newSite),
     });
     const data = await response.json();
-    console.log(data);
+    addSite(data);
+    handleHide();
   };
   
   return [

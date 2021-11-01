@@ -61,6 +61,7 @@ const minAgo = (min = 10) => {
   const now = new Date();
   return new Date(now.getTime() - min*60000).getTime();
 };
+
 const shouldAlert = (results, site) =>
   (results.status >= 500 && (!site.alerted || site.alertedTime <= minAgo(site.minBetweenAlerts)))
   || (site.status === 'down' && results.status < 500);

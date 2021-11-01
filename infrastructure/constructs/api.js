@@ -7,6 +7,7 @@ class RestApi extends Construct {
     super(parent, name, options);
     const {
       getFunction,
+      getSiteFunction,
       postFunction,
       putFunction,
       deleteFunction,
@@ -15,14 +16,16 @@ class RestApi extends Construct {
 
     this.api = new HttpApi(parent, 'http-api', {
       apiName: 'overseer-rest-api',
-      corsPreflight: {
-        allowOrigins: ['http://localhost:3000']
-      }
     });
     this.api.addRoutes({
       path: '/api/list-sites',
       methods: [HttpMethod.GET],
       integration: new LambdaProxyIntegration({ handler: getFunction }),
+    });
+    this.api.addRoutes({
+      path: '/api/site/{url}',
+      methods: [HttpMethod.GET],
+      integration: new LambdaProxyIntegration({ handler: getSiteFunction }),
     });
     this.api.addRoutes({
       path: '/api/site',

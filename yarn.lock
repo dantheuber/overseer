@@ -745,7 +745,7 @@
     "@aws-cdk/core" "1.128.0"
     constructs "^3.3.69"
 
-"@aws-cdk/aws-logs@1.130.0":
+"@aws-cdk/aws-logs@1.130.0", "@aws-cdk/aws-logs@^1.130.0":
   version "1.130.0"
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-logs/-/aws-logs-1.130.0.tgz#b8e21e7d9a89a86fea5587506e23af6b828f0aa4"
   integrity sha512-gfLljD382X+WIGvIy/8pbwjqSNEgsQvRLE4094l41t0fBjzxXRwzGMVB6ddEFko511JvaoZYUekSt7h+z3HdwQ==

@@ -1,3 +1,4 @@
+const path = require('path');
 const { Stack } = require('@aws-cdk/core');
 const { StringParameter } = require('@aws-cdk/aws-ssm');
 const { Sqs } = require('../constructs/sqs.js');
@@ -6,6 +7,7 @@ const { Database } = require('../constructs/dynamo.js');
 const { DashboardBucket } = require('../constructs/bucket');
 const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/lambda.js');
 const { RestApi } = require('../constructs/api.js');
+const { Code } = require('@aws-cdk/aws-lambda');
 
 class App extends Stack {
   constructor(scope, id, props) {
@@ -76,32 +78,39 @@ class App extends Stack {
     const apiCommonOpts = {
       lambdaName: 'api-routes',
       environment: { TABLE_NAME: tableName },
+      code: Code.fromAsset(path.join(__dirname, `../../functions/api-routes`)),
       role,
       env,
     };
     const getFunction = new OverseerLambda(this, 'get-function', {
-      nameSuffix: '-getsites',
+      nameSuffix: '-list-sites',
       handler: 'index.get',
       ...apiCommonOpts,
     }).getLambda();
+    const getSiteFunction = new OverseerLambda(this, 'get-site-function', {
+      nameSuffix: '-get-site',
+      handler: 'index.getSite',
+      ...apiCommonOpts,
+    }).getLambda();
     const postFunction = new OverseerLambda(this, 'post-function', {      
-      nameSuffix: '-postsite',
+      nameSuffix: '-post-site',
       handler: 'index.post',
       ...apiCommonOpts,
     }).getLambda();
     const putFunction = new OverseerLambda(this, 'put-function', {
-      nameSuffix: '-putsite',
+      nameSuffix: '-put-site',
       handler: 'index.put',
       ...apiCommonOpts,
     }).getLambda();
     const deleteFunction = new OverseerLambda(this, 'delete-function', {
-      nameSuffix: '-deletesite',
+      nameSuffix: '-delete-site',
       handler: 'index.delete',
       ...apiCommonOpts,
     }).getLambda();
 
     const restApi = new RestApi(this, 'rest-api', {
       getFunction,
+      getSiteFunction,
       postFunction,
       putFunction,
       deleteFunction,

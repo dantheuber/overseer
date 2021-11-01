@@ -6,11 +6,11 @@ import Button from 'react-bootstrap/Button';
 export const Site = ({ site }) => {
   const siteDown = site.status === 'down';
   const deleteSite = async () => {
-    const results = await fetch('/api/site', {
+    await fetch(`/api/site?url=${encodeURIComponent(site.url)}`, {
       method: 'DELETE',
       body: JSON.stringify(site),
     });
-    console.log(results.json());
+    window.location.reload();
   };
   return (
     <Card>
