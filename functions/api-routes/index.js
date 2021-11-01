@@ -26,11 +26,12 @@ const put = async (event) => {
 exports.post = put;
 exports.put = put;
 
-exports.delete = async (event) => {
-  const { url } = JSON.parse(event.body);
+exports.delete = async (event, context) => {
+  const site = JSON.parse(event.body);
+  console.log(site, context);
   const params = {
     TableName,
-    Key: { url }
+    Key: { url: site.url }
   };
   return formatReturn(await ddb.delete(params).promise());
 };
