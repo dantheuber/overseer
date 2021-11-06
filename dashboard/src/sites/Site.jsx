@@ -1,17 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Alert from 'react-bootstrap/Alert';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
+import { SiteModal } from './SiteModal';
+import { updateSite, deleteSite } from './sites.api';
 
 export const Site = ({ site }) => {
-  const siteDown = site.status === 'down';
-  const deleteSite = async () => {
-    await fetch(`/api/site?url=${encodeURIComponent(site.url)}`, {
-      method: 'DELETE',
-      body: JSON.stringify(site),
-    });
-    window.location.reload();
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const submit = async (values) => {
+    await updateSite(values);
+    handleClose();
   };
+
+  const siteDown = site.status === 'down';
+  
   return (
     <Card>
       <Card.Header>
@@ -26,7 +31,9 @@ export const Site = ({ site }) => {
           Site is {siteDown ? 'DOWN':'ONLINE'}!
         </Alert>
         <Button onClick={deleteSite} variant="danger">Delete</Button>
+        <Button onClick={handleShow} variant="primary">Edit</Button>
       </Card.Body>
+      <SiteModal show={show} onHide={handleClose} onSubmit={submit} site={site} />
     </Card>
   );
 };

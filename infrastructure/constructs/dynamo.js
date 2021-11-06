@@ -11,7 +11,7 @@ class Database extends Construct {
       tableName,
       billingMode: BillingMode.PAY_PER_REQUEST,
       partitionKey: {
-        name: 'url',
+        name: 'id',
         type: AttributeType.STRING,
       },
       removalPolicy: RemovalPolicy.DESTROY,

@@ -6,6 +6,7 @@ const TableName = process.env.TABLE_NAME;
 const ddb = getDynamoClient();
 
 exports.getSite = async (event) => {
+  console.log(event);
   if (!event.queryStringParameters.url) {
     return unprocessableResponse({ msg: 'Must provide URL' });
   }
@@ -21,14 +22,12 @@ exports.get = async () => {
   return jsonResponse(await ddb.scan(params).promise());
 };
 
-const put = async (event) => {
-  console.log(event);
+exports.post = async (event) => {
   const body = JSON.parse(event.body);
   const Item = {
     ...DEFAULT_NEW_SITE,
     ...body,
-  }
-  console.log(Item);
+  };
   const params = {
     TableName,
     Item,
@@ -37,16 +36,25 @@ const put = async (event) => {
   return jsonResponse(await ddb.put(params).promise().then((() => ({ ...Item }))));
 };
 
-exports.post = put;
-exports.put = put;
+exports.put = async (event) => {
+  console.log(event);
+  const Item = JSON.parse(event.body);
+  const params = {
+    TableName,
+    Item,
+    ReturnValues: 'ALL_OLD',
+  };
+  return jsonResponse(await ddb.put(params).promise().then((() => ({ ...Item }))));
+};
 
 exports.delete = async (event) => {
-  if (!event.queryStringParameters.url) {
-    return unprocessableResponse({ msg: 'Must provide URL' });
+  console.log(event);
+  if (!event.pathParams.siteId) {
+    return unprocessableResponse({ msg: 'Must provide siteID' });
   }
   const params = {
     TableName,
-    Key: { url: event.queryStringParameters.url }
+    Key: { id: event.pathParams.siteId },
   };
   return jsonResponse(await ddb.delete(params).promise());
 };
