@@ -5,12 +5,12 @@ import { SitesContext } from './sites/SitesContext';
 
 function App() {
   return (
-    <Container className="App">
-      <SitesContext>
-        <NavBar />
-        <Sites />
-      </SitesContext>
-    </Container>
+    <SitesContext>
+      <NavBar />
+      <Container className="App">
+          <Sites />
+      </Container>
+    </SitesContext>
   );
 }
 

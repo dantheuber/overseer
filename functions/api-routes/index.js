@@ -1,3 +1,4 @@
+const { uuid } = require('uuidv4');
 const { getDynamoClient } = require('./lib/util');
 const { unprocessableResponse, jsonResponse } = require('./lib/apig');
 const { DEFAULT_NEW_SITE } = require('./constants');
@@ -24,10 +25,13 @@ exports.get = async () => {
 
 exports.post = async (event) => {
   const body = JSON.parse(event.body);
+  console.log(body);
   const Item = {
+    id: uuid(),
     ...DEFAULT_NEW_SITE,
     ...body,
   };
+  console.log(Item);
   const params = {
     TableName,
     Item,

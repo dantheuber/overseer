@@ -1,5 +1,10 @@
 import React, { createContext, useState } from "react";
-import { getSites } from './sites.api';
+import {
+  getSites,
+  updateSite as update,
+  deleteSite as del,
+  createSite as create,
+} from './sites.api';
 
 const Context = createContext();
 
@@ -7,6 +12,7 @@ export const useSites = () => React.useContext(Context);
 
 export const SitesContext = ({ children }) => {
   const [sites, setSites] = useState([]);
+  const [sitesLoaded, setSitesLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -23,6 +29,34 @@ export const SitesContext = ({ children }) => {
       const data = await getSites();
       setSites(data.Items);
       setLoading(false);
+      if (!sitesLoaded) setSitesLoaded(true);
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const updateSite = async (site) => {
+    try {
+      const data = await update(site);
+      setSites(sites.map(s => s.id === site.id ? data : s));
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const deleteSite = async (site) => {
+    try {
+      await del(site);
+      removeSite(site);
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const createSite = async (site) => {
+    try {
+      const data = await create(site);
+      addSite(data);
     } catch (error) {
       setError(error);
     }
@@ -37,8 +71,12 @@ export const SitesContext = ({ children }) => {
     <Context.Provider
       value={{
         sites,
-        addSite,
+        totalSites: sites.length,
+        createSite,
         removeSite,
+        updateSite,
+        deleteSite,
+        sitesLoaded,
         loading,
         error,
       }}

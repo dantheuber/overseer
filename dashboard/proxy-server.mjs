@@ -9,11 +9,10 @@ const onRequest = async (client_req, client_res) => {
     client_req.on('data', chunk => { data += chunk; });
     client_req.on('end', () => resolve(data));
   });
+
   let body;
-  console.log(client_req);
   if (client_req.method === 'POST' || client_req === 'PUT') {
     body = await parseBody(client_req);
-    console.log(body);
   }
   
   const results = await makeRequest({
@@ -26,7 +25,6 @@ const onRequest = async (client_req, client_res) => {
   client_res.write(text)
   client_res.end();
   console.log(client_req.method, client_req.url, results.status, results.statusText);
-  // console.log(results);
 };
 
 http.createServer(onRequest).listen(4000);

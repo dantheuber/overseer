@@ -3,6 +3,15 @@ import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { useSites } from './SitesContext';
+
+const DEFAULT_NEW_SITE = {
+  label: '',
+  url: '',
+  description: '',
+  alertDiscord: false,
+  tags: [],
+};
 
 export const SiteModal = ({
   site,
@@ -10,11 +19,16 @@ export const SiteModal = ({
   onSubmit,
   show,
 }) => {
+  const { deleteSite } = useSites();
   const formRef = useRef(null);
   const [validated, setValidated] = useState(false);
   const [existingSite, setExistingSite] = useState(false);
   const [newSite, setNewSite] = useState(site);
   
+  const resetSite = () => {
+    setNewSite(DEFAULT_NEW_SITE);
+  };
+
   const updateSite = (e) => {
     const { name, value, type, checked } = e.target;
     const isCheckbox = type === 'checkbox';
@@ -29,7 +43,13 @@ export const SiteModal = ({
     const isValid = form.checkValidity();
     setValidated(true);
     if (!isValid) return;
+
     await onSubmit(newSite);
+
+    if (!existingSite) {
+      resetSite();
+    }
+
     onHide();
   };
 
@@ -42,7 +62,7 @@ export const SiteModal = ({
   return (
     <Modal key="modal" show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Monitor New Site</Modal.Title>
+        <Modal.Title>Monitor Site</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form ref={formRef} noValidate validated={validated}>
@@ -66,7 +86,6 @@ export const SiteModal = ({
             <Form.Control
               type="text"
               name="url"
-              disabled={existingSite}
               required
               value={newSite.url}
               onChange={updateSite}
@@ -103,8 +122,17 @@ export const SiteModal = ({
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>Close</Button>
-        <Button variant="primary" onClick={handleSubmit}>Save</Button>
+        { existingSite && (
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => deleteSite(site)}
+          >
+            Delete
+          </Button>
+        )}
+        <Button size="sm" variant="secondary" onClick={onHide}>Close</Button>
+        <Button size="sm" variant="primary" onClick={handleSubmit}>Save</Button>
       </Modal.Footer>
     </Modal>
   );
@@ -116,10 +144,5 @@ SiteModal.propTypes = {
   site: PropTypes.object,
 };
 SiteModal.defaultProps = {
-  site: {
-    label: '',
-    url: '',
-    description: '',
-    alertDiscord: false,
-  },
+  site: DEFAULT_NEW_SITE,
 };

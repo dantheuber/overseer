@@ -3,9 +3,10 @@ import Alert from 'react-bootstrap/Alert';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import { SiteModal } from './SiteModal';
-import { updateSite, deleteSite } from './sites.api';
+import { useSites } from './SitesContext';
 
 export const Site = ({ site }) => {
+  const { updateSite, deleteSite } = useSites();
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
@@ -24,14 +25,12 @@ export const Site = ({ site }) => {
           <Button variant="link" href={site.url} target="_blank">{site.label}</Button>
         </Card.Title>
       </Card.Header>
-      {/* <Card.Img variant="top" src="holder.js/100px180" /> */}
       <Card.Body>
         <Card.Text>{ site.description }</Card.Text>
         <Alert variant={siteDown ? 'danger':'success'}>
-          Site is {siteDown ? 'DOWN':'ONLINE'}!
+          Site is {siteDown ? 'OFFLINE':'ONLINE'}!
         </Alert>
-        <Button onClick={deleteSite} variant="danger">Delete</Button>
-        <Button onClick={handleShow} variant="primary">Edit</Button>
+        <Button size="sm" onClick={handleShow} variant="secondary">Edit</Button>
       </Card.Body>
       <SiteModal show={show} onHide={handleClose} onSubmit={submit} site={site} />
     </Card>
