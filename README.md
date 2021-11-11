@@ -15,6 +15,7 @@ DASHBOARD_DOMAIN=dashboard.yourwebsite.com // MUST be a subdomain of DOMAIN_NAME
 ACM_CERT_ARN=some:aws:arn // this cert should be issued for your domain name
 
 // for authentication via AWS cognito
+COGNITO_PREFIX=yourcognitoprefix // this must be globally unique within AWS
 AMAZON_CLIENT_ID=youramazonoauthclientid
 AMAZON_CLIENT_SECRET=youramazonoauthsecret
 GOOGLE_CLIENT_ID=yourgoogleoauthclientid
