@@ -1,3 +1,4 @@
 node_modules/
 .env
 cdk.out/
+config.json

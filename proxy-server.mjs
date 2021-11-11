@@ -1,5 +1,7 @@
 import http from 'http';
 import fetch from 'node-fetch';
+import { config } from 'dotenv';
+config();
 
 const makeRequest = async ({ path, ...rest }) => await fetch(`https://${process.env.DASHBOARD_DOMAIN}${path}`, { ...rest });
 

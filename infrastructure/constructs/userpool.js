@@ -104,17 +104,21 @@ class Pool extends Construct {
       authFlows: {
         userPassword: true,
         userSrp: true,
-        refreshToken: true, 
-        custom: true
       },
-      // oAuth: {
-      //   callbackUrLs: [
-      //     `https://${process.env.DASHBOARD_DOMAIN}/api/callback`,
-      //   ],
-      //   flows: {
-      //     clientCredentials: true,
-      //   },
-      // },
+      oAuth: {
+        callbackUrls: [
+          `https://${process.env.DASHBOARD_DOMAIN}`,
+          'http://localhost:3000', // for local development
+        ],
+        scopes: [
+          OAuthScope.PROFILE,
+          OAuthScope.EMAIL,
+          OAuthScope.OPENID,
+        ],
+        flows: {
+          implicitCodeGrant: true,
+        },
+      },
       preventUserExistenceErrors: true,
       supportedIdentityProviers: [
         UserPoolClientIdentityProvider.AMAZON,
@@ -127,13 +131,10 @@ class Pool extends Construct {
 
     this.domain = new UserPoolDomain(this, 'overseer-user-pool-domain', {
       userPool: this.pool,
-      cognitoDomain: {
-        domainPrefix: process.env.COGNITO_PREFIX,
-      }
-      // customDomain: {
-      //   domainName: `login.${process.env.DOMAIN_NAME}`,
-      //   certificate: Certificate.fromCertificateArn(this, 'userpool-domain-certificate', process.env.ACM_CERT_ARN),
-      // },
+      customDomain: {
+        domainName: `auth.${process.env.DOMAIN_NAME}`,
+        certificate: Certificate.fromCertificateArn(this, 'userpool-domain-certificate', process.env.ACM_CERT_ARN),
+      },
     });
   }
 }

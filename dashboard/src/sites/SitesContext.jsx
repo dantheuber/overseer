@@ -1,4 +1,9 @@
-import React, { createContext, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect
+} from "react";
 import {
   getSites,
   updateSite as update,
@@ -8,7 +13,7 @@ import {
 
 const Context = createContext();
 
-export const useSites = () => React.useContext(Context);
+export const useSites = () => useContext(Context);
 
 export const SitesContext = ({ children }) => {
   const [sites, setSites] = useState([]);
@@ -62,7 +67,7 @@ export const SitesContext = ({ children }) => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInterval(fetchSites, 1000 * 60);
     fetchSites();
   }, []);
