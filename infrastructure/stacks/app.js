@@ -109,11 +109,6 @@ class App extends Stack {
       handler: 'index.delete',
       ...apiCommonOpts,
     }).getLambda();
-    // const callbackFunction = new OverseerLambda(this, 'callback-function', {
-    //   nameSuffix: '-callback',
-    //   handler: 'index.callback',
-    //   ...apiCommonOpts,
-    // }).getLambda();
 
     const restApi = new RestApi(this, 'rest-api', {
       getFunction,
@@ -121,7 +116,6 @@ class App extends Stack {
       postFunction,
       putFunction,
       deleteFunction,
-      // callbackFunction,
     });
     
     const ssmParam = new StringParameter(this, 'api-id', {
