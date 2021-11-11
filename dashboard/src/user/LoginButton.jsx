@@ -6,7 +6,7 @@ const buildUrl = () =>
   `https://${authDomain}/login?client_id=${
     userPoolClientId
   }&response_type=token&scope=email+openid+profile&redirect_uri=${
-    encodeURIComponent(window.location.href)
+    encodeURIComponent(`${window.location.protocol}//${window.location.host}`)
   }`;
 
 export const LoginButton = () => {
