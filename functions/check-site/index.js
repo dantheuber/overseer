@@ -45,7 +45,7 @@ const handler = async (event) => {
     if (!site.alerted && results.status >= 500) {
       return await ddb.update({
         TableName: process.env.TABLE_NAME,
-        Key: { url: site.url },
+        Key: { id: site.id },
         UpdateExpression: 'set #downTime = :dt',
         ExpressionAttributeNames: {
           '#downTime': 'downTime'
@@ -61,7 +61,7 @@ const handler = async (event) => {
     if (!site.status) {
       return await ddb.update({
         TableName: process.env.TABLE_NAME,
-        Key: { url: site.url },
+        Key: { id: site.id },
         UpdateExpression: 'set #st = :st',
         ExpressionAttributeNames: {
           '#st': 'status',

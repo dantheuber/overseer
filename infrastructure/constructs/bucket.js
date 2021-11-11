@@ -112,7 +112,7 @@ class DashboardBucket extends Construct {
   getBucket() {
     return this.bucket;
   }
-  getCloudfrontDistro() {
+  getCloudfrontDistribution() {
     return this.cloudfrontDistribution;
   }
 };

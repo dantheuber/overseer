@@ -46,7 +46,7 @@ export const SitesContext = ({ children }) => {
 
   const deleteSite = async (site) => {
     try {
-      await del(site);
+      await del(site.id);
       removeSite(site);
     } catch (error) {
       setError(error);

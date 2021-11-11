@@ -11,6 +11,7 @@ class RestApi extends Construct {
       postFunction,
       putFunction,
       deleteFunction,
+      callbackFunction
     } = options;
 
 
@@ -42,6 +43,11 @@ class RestApi extends Construct {
       methods: [HttpMethod.DELETE],
       integration: new LambdaProxyIntegration({ handler: deleteFunction }),
     });
+    // this.api.addRoutes({
+    //   path: '/api/callback',
+    //   methods: [HttpMethod.POST, HttpMethod.GET],
+    //   integration: new LambdaProxyIntegration({ handler: callbackFunction }),
+    // });
   }
 
   getApi() {

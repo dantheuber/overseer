@@ -41,10 +41,11 @@ exports.post = async (event) => {
 };
 
 exports.put = async (event) => {
-  console.log(event);
+  const siteId = event.pathParameters.siteId;
   const Item = JSON.parse(event.body);
   const params = {
     TableName,
+    Key: { id: siteId },
     Item,
     ReturnValues: 'ALL_OLD',
   };
@@ -52,13 +53,24 @@ exports.put = async (event) => {
 };
 
 exports.delete = async (event) => {
-  console.log(event);
-  if (!event.pathParams.siteId) {
+  const siteId = event.pathParameters.siteId;
+  if (!siteId) {
     return unprocessableResponse({ msg: 'Must provide siteID' });
   }
   const params = {
     TableName,
-    Key: { id: event.pathParams.siteId },
+    Key: { id: siteId },
   };
   return jsonResponse(await ddb.delete(params).promise());
 };
+
+exports.callback = async (event) => {
+  console.log(event);
+  return jsonResponse({
+    statusCode: 200,
+    body: JSON.stringify({
+      message: 'Hello from Lambda!',
+      input: event,
+    }),
+  });
+}

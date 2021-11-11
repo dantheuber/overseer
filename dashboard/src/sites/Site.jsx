@@ -6,7 +6,7 @@ import { SiteModal } from './SiteModal';
 import { useSites } from './SitesContext';
 
 export const Site = ({ site }) => {
-  const { updateSite, deleteSite } = useSites();
+  const { updateSite } = useSites();
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);

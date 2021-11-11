@@ -27,7 +27,7 @@ const handler = async (event) => {
 
     await ddb.update({
       TableName: process.env.TABLE_NAME,
-      Key: { url: parsed.site.url },
+      Key: { id: parsed.site.id },
       UpdateExpression: 'set #status = :st, #alerted = :alt, #alertedTime = :altTime',
       ExpressionAttributeNames: {
         '#status': 'status',

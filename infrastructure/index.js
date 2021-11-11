@@ -21,6 +21,8 @@ async function build() {
   const appStack = new App(app, 'overseer-app-stack', {
     ...env,
   });
+
+  app.synth();
 }
 
 build().catch((e) => {
