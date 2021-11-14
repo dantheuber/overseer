@@ -1,14 +1,19 @@
 import Container from 'react-bootstrap/Container';
+import { NavBar } from './Navigation';
 import { Sites } from './sites/Sites';
+import { SitesContext } from './sites/SitesContext';
+import { UserContext } from './user/UserContext';
 
 function App() {
   return (
-    <Container className="App">
-      <header>
-        <h1>Overseer</h1>
-      </header>
-      <Sites />
-    </Container>
+    <UserContext>
+      <SitesContext>
+        <NavBar />
+        <Container className="App">
+            <Sites />
+        </Container>
+      </SitesContext>
+    </UserContext>
   );
 }
 

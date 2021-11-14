@@ -1,22 +1,35 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { useSites } from './SitesContext';
+
+const DEFAULT_NEW_SITE = {
+  label: '',
+  url: '',
+  description: '',
+  alertDiscord: false,
+  tags: [],
+};
 
 export const SiteModal = ({
   site,
-  addSite,
-  modifyExisting
+  onHide,
+  onSubmit,
+  show,
 }) => {
+  const { deleteSite } = useSites();
   const formRef = useRef(null);
-  const [show, setShow] = useState(false);
   const [validated, setValidated] = useState(false);
+  const [existingSite, setExistingSite] = useState(false);
   const [newSite, setNewSite] = useState(site);
-  const handleShow = () => setShow(true);
-  const handleHide = () => setShow(false);
+  
+  const resetSite = () => {
+    setNewSite(DEFAULT_NEW_SITE);
+  };
 
-  const updateNewSite = (e) => {
+  const updateSite = (e) => {
     const { name, value, type, checked } = e.target;
     const isCheckbox = type === 'checkbox';
     setNewSite({
@@ -30,21 +43,26 @@ export const SiteModal = ({
     const isValid = form.checkValidity();
     setValidated(true);
     if (!isValid) return;
-    const response = await fetch('/api/site', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newSite),
-    });
-    const data = await response.json();
-    addSite(data);
-    handleHide();
+
+    await onSubmit(newSite);
+
+    if (!existingSite) {
+      resetSite();
+    }
+
+    onHide();
   };
+
+  useEffect(() => {
+    if (site.url) {
+      setExistingSite(true);
+    }
+  }, [site]);
   
-  return [
-    <Button key="toggle" onClick={handleShow} variant="success">New Site</Button>,
-    <Modal key="modal" show={show} onHide={handleHide}>
+  return (
+    <Modal key="modal" show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Monitor New Site</Modal.Title>
+        <Modal.Title>Monitor Site</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form ref={formRef} noValidate validated={validated}>
@@ -54,8 +72,9 @@ export const SiteModal = ({
               type="text"
               name="label"
               required
+              value={newSite.label}
               placeholder="A short name or label for this site."
-              onChange={updateNewSite}
+              onChange={updateSite}
             />
             <Form.Control.Feedback type="invalid">Please provide a label</Form.Control.Feedback>
             <Form.Text className="text-muted">
@@ -68,7 +87,8 @@ export const SiteModal = ({
               type="text"
               name="url"
               required
-              onChange={updateNewSite}
+              value={newSite.url}
+              onChange={updateSite}
               placeholder="Enter site URL"
             />
             <Form.Control.Feedback type="invalid">What do you expect to be monitored?</Form.Control.Feedback>
@@ -82,7 +102,8 @@ export const SiteModal = ({
               label="Discord"
               type="checkbox"
               name="alertDiscord"
-              onChange={updateNewSite}
+              checked={newSite.alertDiscord}
+              onChange={updateSite}
             />
             <Form.Text className="text-muted">More coming soon!</Form.Text>
           </Form.Group>
@@ -91,8 +112,9 @@ export const SiteModal = ({
             <Form.Control
               as="textarea"
               rows={3}
+              value={newSite.description}
               name="description"
-              onChange={updateNewSite}
+              onChange={updateSite}
               placeholder="An short description of this site"
             />
             <Form.Text className="text-muted">(Optional)</Form.Text>
@@ -100,16 +122,27 @@ export const SiteModal = ({
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleHide}>Close</Button>
-        <Button variant="primary" onClick={handleSubmit}>Save</Button>
+        { existingSite && (
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => deleteSite(site)}
+          >
+            Delete
+          </Button>
+        )}
+        <Button size="sm" variant="secondary" onClick={onHide}>Close</Button>
+        <Button size="sm" variant="primary" onClick={handleSubmit}>Save</Button>
       </Modal.Footer>
     </Modal>
-  ]
+  );
 }
 SiteModal.propTypes = {
-  addSite: PropTypes.func.isRequired,
+  onHide: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  show: PropTypes.bool.isRequired,
   site: PropTypes.object,
 };
 SiteModal.defaultProps = {
-  site: {}
+  site: DEFAULT_NEW_SITE,
 };

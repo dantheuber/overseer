@@ -50,7 +50,7 @@ class LambdaRole extends Construct {
 
     this.role = new iam.Role(parent, 'lambda-role', {
       managedPolicies,
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     });
     const document = new iam.PolicyDocument();
     document.addStatements(new iam.PolicyStatement({

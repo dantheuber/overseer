@@ -53,8 +53,8 @@ class DashboardBucket extends Construct {
     );
 
     const edgeRole = new EdgeLambdaRole(this, 'redirect-role');
-    const redirectLambda = new Function(this, 'redirect-lambda', {
-      functionName: 'overseer-cdn-redirect',
+    const redirectLambda = new Function(this, 'edge-redirect-lambda', {
+      functionName: 'overseer-redirect',
       code: Code.fromAsset(path.join(__dirname, '../../functions/redirect')),
       handler: 'index.handler',
       runtime: Runtime.NODEJS_12_X,
@@ -112,7 +112,7 @@ class DashboardBucket extends Construct {
   getBucket() {
     return this.bucket;
   }
-  getCloudfrontDistro() {
+  getCloudfrontDistribution() {
     return this.cloudfrontDistribution;
   }
 };

@@ -1,13 +1,15 @@
 const path = require('path');
 const { Stack } = require('@aws-cdk/core');
-const { StringParameter } = require('@aws-cdk/aws-ssm');
-const { Sqs } = require('../constructs/sqs.js');
-const { Sns } = require('../constructs/sns.js');
-const { Database } = require('../constructs/dynamo.js');
-const { DashboardBucket } = require('../constructs/bucket');
-const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/lambda.js');
-const { RestApi } = require('../constructs/api.js');
 const { Code } = require('@aws-cdk/aws-lambda');
+const { StringParameter } = require('@aws-cdk/aws-ssm');
+const { Sqs } = require('../constructs/sqs');
+const { Sns } = require('../constructs/sns');
+const { Database } = require('../constructs/dynamo');
+const { DashboardBucket } = require('../constructs/bucket');
+const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/lambda');
+const { Domain } = require('../constructs/domain');
+const { RestApi } = require('../constructs/api');
+const { Pool } = require('../constructs/userpool');
 
 class App extends Stack {
   constructor(scope, id, props) {
@@ -108,7 +110,13 @@ class App extends Stack {
       ...apiCommonOpts,
     }).getLambda();
 
+    const pool = new Pool(this, 'user-pool', {
+      env,
+      topic,
+    });
+
     const restApi = new RestApi(this, 'rest-api', {
+      authorizer: pool.getAuthorizer(),
       getFunction,
       getSiteFunction,
       postFunction,
@@ -126,6 +134,13 @@ class App extends Stack {
       api: restApi.getApi(),
       env,
     });
+
+    this.domain = new Domain(this, 'overseer-domain', {
+      cloudfrontDistribution: this.bucket.getCloudfrontDistribution(),
+      authCloudFrontDistribution: pool.getDomain().cloudFrontDomainName,
+      bucket: this.bucket.getBucket(),
+    });
+    this.domain.node.addDependency(pool.getDomain());
   };
   getBucketUrl() {
     return this.bucket.getBucket().bucketWebsiteUrl;
