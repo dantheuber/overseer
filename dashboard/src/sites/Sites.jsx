@@ -11,10 +11,12 @@ export const Sites = () => {
     loading,
     sitesLoaded,
     totalSites,
+    error
   } = useSites();
 
   return (
     <Row>
+      { error && <Col>{error}</Col> }
       { sitesLoaded && !totalSites && (
         <Col>
           <h3>No sites found</h3>
