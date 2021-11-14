@@ -8,21 +8,31 @@ const {
 class Domain extends Construct {
   constructor(scope, id, props) {
     super(scope, id);
-    const { bucket, cloudfrontDistribution } = props;
+    const {
+      bucket,
+      cloudfrontDistribution,
+      authCloudFrontDistribution,
+    } = props;
     const zone = {
       hostedZoneId: process.env.HOSTED_ZONE_ID,
       zoneName: process.env.DOMAIN_NAME,
     };
+    this.rootRecord = new RecordSet(this, 'root-record', {
+      zone,
+      recordType: RecordType.A,
+      target: RecordTarget.fromAlias(new BucketWebsiteTarget(bucket)),
+    });
     this.dashboardRecord = new RecordSet(this, 'dashboard-record', {
       zone,
       recordType: RecordType.A,
       recordName: process.env.DASHBOARD_DOMAIN.replace(`.${process.env.DOMAIN_NAME}`, ''),
       target: RecordTarget.fromAlias(new CloudFrontTarget(cloudfrontDistribution)),
     });
-    this.rootRecord = new RecordSet(this, 'root-record', {
+    this.authRecord = new RecordSet(this, 'cognito-distribution-record', {
       zone,
-      recordType: RecordType.A,
-      target: RecordTarget.fromAlias(new BucketWebsiteTarget(bucket)),
+      recordType: RecordType.CNAME,
+      recordName: 'auth',
+      target: RecordTarget.fromValues(authCloudFrontDistribution),
     });
   }
 

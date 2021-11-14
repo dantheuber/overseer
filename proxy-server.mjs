@@ -17,16 +17,25 @@ const onRequest = async (client_req, client_res) => {
     body = await parseBody(client_req);
   }
   
-  const results = await makeRequest({
-    path: client_req.url,
-    method: client_req.method,
-    body,
-  });
-  client_res.writeHead(results.status, results.headers);
-  const text = await results.text();
-  client_res.write(text)
-  client_res.end();
-  console.log(client_req.method, client_req.url, results.status, results.statusText);
+  try {
+    const results = await makeRequest({
+      path: client_req.url,
+      method: client_req.method,
+      headers: {
+        Authorization: client_req.headers.authorization,
+      },
+      body,
+    });
+    client_res.writeHead(results.status, results.headers);
+    const text = await results.text();
+    client_res.write(text)
+    client_res.end();
+    console.log(client_req.method, client_req.url, results.status, results.statusText);
+  } catch (e) {
+    console.log(e);
+    client_res.writeHead(500);
+    client_res.end();
+  }
 };
 
 http.createServer(onRequest).listen(4000);

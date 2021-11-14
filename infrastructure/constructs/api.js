@@ -6,17 +6,18 @@ class RestApi extends Construct {
   constructor(parent, name, options) {
     super(parent, name, options);
     const {
+      authorizer: defaultAuthorizer,
       getFunction,
       getSiteFunction,
       postFunction,
       putFunction,
       deleteFunction,
-      callbackFunction
     } = options;
 
 
     this.api = new HttpApi(parent, 'http-api', {
       apiName: 'overseer-rest-api',
+      defaultAuthorizer,
     });
     this.api.addRoutes({
       path: '/api/sites',
@@ -43,11 +44,6 @@ class RestApi extends Construct {
       methods: [HttpMethod.DELETE],
       integration: new LambdaProxyIntegration({ handler: deleteFunction }),
     });
-    // this.api.addRoutes({
-    //   path: '/api/callback',
-    //   methods: [HttpMethod.POST, HttpMethod.GET],
-    //   integration: new LambdaProxyIntegration({ handler: callbackFunction }),
-    // });
   }
 
   getApi() {

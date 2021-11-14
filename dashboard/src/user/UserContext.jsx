@@ -6,7 +6,8 @@ import React, {
 } from 'react';
 import jwtDecode from 'jwt-decode';
 import { setCookie, getCookieValue } from 'cookies-utils';
-const COOKIE_KEY = 'ovs_jwt';
+export const COOKIE_KEY = 'id';
+export const AUTH_KEY = 'jwt';
 
 const Context = createContext();
 
@@ -34,30 +35,37 @@ export const UserContext = ({ children }) => {
   const [user, setUser] = useState(null);
   const isLoggedIn = !!user;  
   useEffect(() => {
-    const jwt = getCookieValue(COOKIE_KEY);
-    if (jwt) {
-      setTokens({ id_token: jwt });
-      setUser(parseUserFromToken(jwt));
+    if (window.location.hash) {
+      const params = window.location.hash.substring(1).split('&');
+      const parsed = params.reduce((acc, param) => {
+        const [key, value] = param.split('=');
+        return { ...acc, [key]: value };
+      }, {});
+      setTokens(parsed);
+      if (parsed.id_token) {
+        setUser(parseUserFromToken(parsed.id_token));
+        setCookie({
+          name: COOKIE_KEY,
+          value: parsed.id_token,
+        });
+        setCookie({
+          name: AUTH_KEY,
+          value: parsed.access_token,
+        });
+        window.location.hash = '';
+        return;
+      }
+    }
+    // if hash is empty then check cookies
+    const id_token = getCookieValue(COOKIE_KEY);
+    const access_token = getCookieValue(AUTH_KEY);
+    if (id_token && access_token) {
+      setTokens({ id_token, access_token });
+      setUser(parseUserFromToken(id_token));
       return;
     }
-    // pull  params from location.hash and look for cookie if not present
-    if (!window.location.hash) return;
-    const params = window.location.hash.substring(1).split('&');
-    const parsed = params.reduce((acc, param) => {
-      const [key, value] = param.split('=');
-      return { ...acc, [key]: value };
-    }, {});
-    setTokens(parsed);
-    if (parsed.id_token) {
-      setUser(parseUserFromToken(parsed.id_token));
-      setCookie({
-        name: COOKIE_KEY,
-        value: parsed.id_token,
-      });
-      window.location.hash = '';
-    }
   }, []);
-  useEffect(() => console.log(user), [user]);
+  useEffect(() => console.log(user, tokens), [user, tokens]);
   return (
     <Context.Provider value={{ user, tokens, isLoggedIn }}>{children}</Context.Provider>
   );

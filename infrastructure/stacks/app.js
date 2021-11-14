@@ -110,7 +110,13 @@ class App extends Stack {
       ...apiCommonOpts,
     }).getLambda();
 
+    const pool = new Pool(this, 'user-pool', {
+      env,
+      topic,
+    });
+
     const restApi = new RestApi(this, 'rest-api', {
+      authorizer: pool.getAuthorizer(),
       getFunction,
       getSiteFunction,
       postFunction,
@@ -131,15 +137,10 @@ class App extends Stack {
 
     this.domain = new Domain(this, 'overseer-domain', {
       cloudfrontDistribution: this.bucket.getCloudfrontDistribution(),
+      authCloudFrontDistribution: pool.getDomain().cloudFrontDomainName,
       bucket: this.bucket.getBucket(),
     });
-    
-    const pool = new Pool(this, 'user-pool', {
-      env,
-      topic,
-    });
-    pool.node.addDependency(this.domain.getDashboardRecord());
-    pool.node.addDependency(this.domain.getRootRecord());
+    this.domain.node.addDependency(pool.getDomain());
   };
   getBucketUrl() {
     return this.bucket.getBucket().bucketWebsiteUrl;

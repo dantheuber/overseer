@@ -1,4 +1,5 @@
 const { Construct, Duration } = require('@aws-cdk/core');
+const { HttpUserPoolAuthorizer } = require('@aws-cdk/aws-apigatewayv2-authorizers');
 const { Certificate } = require('@aws-cdk/aws-certificatemanager');
 const {
   UserPoolIdentityProviderAmazon,
@@ -40,7 +41,6 @@ class Pool extends Construct {
       accountRecovery: AccountRecovery.EMAIL_AND_PHONE_WITHOUT_MFA,
       signInCaseSensitive: false,
       signInAliases: {
-        username: true,
         email: true,
       },
       autoVerify: {
@@ -91,7 +91,6 @@ class Pool extends Construct {
         email: ProviderAttribute.GOOGLE_EMAIL,
         name: ProviderAttribute.GOOGLE_NAME,
         phone_number: ProviderAttribute.GOOGLE_PHONE_NUMBERS,
-        avatar: ProviderAttribute.GOOGLE_PICTURE,
       },
     });
 
@@ -108,6 +107,7 @@ class Pool extends Construct {
       oAuth: {
         callbackUrls: [
           `https://${process.env.DASHBOARD_DOMAIN}`,
+          `https://${process.env.DASHBOARD_DOMAIN}/`,
           'http://localhost:3000', // for local development
         ],
         scopes: [
@@ -131,11 +131,32 @@ class Pool extends Construct {
 
     this.domain = new UserPoolDomain(this, 'overseer-user-pool-domain', {
       userPool: this.pool,
+      // cognitoDomain: {
+      //   domainPrefix: 'ovrsr',
+      // }
       customDomain: {
         domainName: `auth.${process.env.DOMAIN_NAME}`,
         certificate: Certificate.fromCertificateArn(this, 'userpool-domain-certificate', process.env.ACM_CERT_ARN),
       },
     });
+
+    this.authorizer = new HttpUserPoolAuthorizer({
+      authorizerName: 'user-pool-authorizer',
+      userPool: this.pool,
+      userPoolClients: [this.client],
+    });
+  }
+  getPool() {
+    return this.pool;
+  }
+  getClient() {
+    return this.client;
+  }
+  getDomain() {
+    return this.domain;
+  }
+  getAuthorizer() {
+    return this.authorizer;
   }
 }
 

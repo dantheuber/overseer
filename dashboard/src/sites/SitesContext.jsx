@@ -10,6 +10,7 @@ import {
   deleteSite as del,
   createSite as create,
 } from './sites.api';
+import { useUser } from '../user/UserContext';
 
 const Context = createContext();
 
@@ -32,10 +33,16 @@ export const SitesContext = ({ children }) => {
   const fetchSites = async () => {
     try {
       const data = await getSites();
+      if (data.message) {
+        setError(data.message);
+        setLoading(false);
+        return;
+      }
       setSites(data.Items);
       setLoading(false);
       if (!sitesLoaded) setSitesLoaded(true);
     } catch (error) {
+      console.log(error);
       setError(error);
     }
   };
