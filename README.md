@@ -27,6 +27,13 @@ GOOGLE_CLIENT_ID=yourgoogleoauthclientid
 GOOGLE_CLIENT_SECRET=yourgoogleoauthsecret
 ```
 
+## Doing Stuff
+```bash
+yarn start # starts proxy and local development server
+
+yarn deploy # builds and deploys stack to AWS
+```
+
 
 ## Notes
 - AFTER first deployment, you will need to create a `config.json` file in the root of the `/dashboard` directory.

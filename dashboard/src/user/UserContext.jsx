@@ -41,8 +41,9 @@ export const UserContext = ({ children }) => {
         const [key, value] = param.split('=');
         return { ...acc, [key]: value };
       }, {});
-      setTokens(parsed);
+      
       if (parsed.id_token) {
+        setTokens(parsed);
         setUser(parseUserFromToken(parsed.id_token));
         setCookie({
           name: COOKIE_KEY,

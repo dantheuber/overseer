@@ -4,19 +4,18 @@ import React, {
   useState,
   useEffect
 } from "react";
-import {
-  getSites,
-  updateSite as update,
-  deleteSite as del,
-  createSite as create,
-} from './sites.api';
 import { useUser } from '../user/UserContext';
+import { useFetch } from '../FetchProvider';
+
+const BASE_API_URL = '/api/sites';
 
 const Context = createContext();
 
 export const useSites = () => useContext(Context);
 
 export const SitesContext = ({ children }) => {
+  const { fetch } = useFetch();
+  const { isLoggedIn } = useUser();
   const [sites, setSites] = useState([]);
   const [sitesLoaded, setSitesLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -32,7 +31,7 @@ export const SitesContext = ({ children }) => {
 
   const fetchSites = async () => {
     try {
-      const data = await getSites();
+      const data = await fetch(BASE_API_URL, { method: 'GET' });
       if (data.message) {
         setError(data.message);
         setLoading(false);
@@ -43,13 +42,17 @@ export const SitesContext = ({ children }) => {
       if (!sitesLoaded) setSitesLoaded(true);
     } catch (error) {
       console.log(error);
-      setError(error);
+      setError(`${error}`);
     }
   };
 
   const updateSite = async (site) => {
     try {
-      const data = await update(site);
+      const data = await fetch(`${BASE_API_URL}/${site.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(site)
+      });
       setSites(sites.map(s => s.id === site.id ? data : s));
     } catch (error) {
       setError(error);
@@ -58,7 +61,9 @@ export const SitesContext = ({ children }) => {
 
   const deleteSite = async (site) => {
     try {
-      await del(site.id);
+      await fetch(`${BASE_API_URL}/${site.id}`, {
+        method: 'DELETE'
+      });
       removeSite(site);
     } catch (error) {
       setError(error);
@@ -67,7 +72,11 @@ export const SitesContext = ({ children }) => {
 
   const createSite = async (site) => {
     try {
-      const data = await create(site);
+      const data = await fetch(BASE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(site)
+      });
       addSite(data);
     } catch (error) {
       setError(error);
@@ -75,9 +84,11 @@ export const SitesContext = ({ children }) => {
   };
 
   useEffect(() => {
-    setInterval(fetchSites, 1000 * 60);
-    fetchSites();
-  }, []);
+    if (isLoggedIn) {
+      setInterval(fetchSites, 1000 * 60);
+      fetchSites();
+    }
+  }, [isLoggedIn]);
 
   return (
     <Context.Provider

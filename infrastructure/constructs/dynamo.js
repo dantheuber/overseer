@@ -7,19 +7,34 @@ class Database extends Construct {
     
     const { tableName } = options;
 
-    this.table = new Table(parent, 'sites-table', {
+    this.table = new Table(parent, 'overseer-sites-table', {
       tableName,
       billingMode: BillingMode.PAY_PER_REQUEST,
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
       },
+      sortKey: {
+        name: 'owner',
+        type: AttributeType.STRING,
+      },
       removalPolicy: RemovalPolicy.DESTROY,
+    });
+    this.table.addGlobalSecondaryIndex({
+      indexName: 'owner',
+      partitionKey: {
+        name: 'owner',
+        type: AttributeType.STRING,
+      },
     });
     this.table.addGlobalSecondaryIndex({
       indexName: 'status',
       partitionKey: {
         name: 'status',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'owner',
         type: AttributeType.STRING,
       },
     });
