@@ -1,37 +1,48 @@
 const { uuid } = require('uuidv4');
 const { getDynamoClient } = require('./lib/util');
-const { unprocessableResponse, jsonResponse } = require('./lib/apig');
+const { jsonResponse } = require('./lib/apig');
 const { DEFAULT_NEW_SITE } = require('./constants');
 
 const TableName = process.env.TABLE_NAME;
 const ddb = getDynamoClient();
 
+const getOwner = event => event.requestContext.authorizer.jwt.claims.sub;
+
 exports.getSite = async (event) => {
-  console.log(event);
-  if (!event.queryStringParameters.url) {
-    return unprocessableResponse({ msg: 'Must provide URL' });
-  }
+  const owner = getOwner(event);
+  const siteId = event.pathParameters.siteId;
   const params = {
     TableName,
-    Key: { url: event.queryStringParameters.url }
+    Key: { id: siteId, owner },
   };
   return jsonResponse(await ddb.query(params).promise());
 };
 
-exports.get = async () => {
-  const params = { TableName };
-  return jsonResponse(await ddb.scan(params).promise());
+exports.get = async (event) => {
+  const owner = getOwner(event);
+  const params = {
+    TableName,
+    IndexName: 'owner',
+    KeyConditionExpression: '#owner = :owner',
+    ExpressionAttributeValues: {
+      ':owner': owner,
+    },
+    ExpressionAttributeNames: {
+      '#owner': 'owner',
+    }
+  };
+  return jsonResponse(await ddb.query(params).promise());
 };
 
 exports.post = async (event) => {
+  const owner = getOwner(event);
   const body = JSON.parse(event.body);
-  console.log(body);
   const Item = {
     id: uuid(),
+    owner,
     ...DEFAULT_NEW_SITE,
     ...body,
   };
-  console.log(Item);
   const params = {
     TableName,
     Item,
@@ -41,11 +52,12 @@ exports.post = async (event) => {
 };
 
 exports.put = async (event) => {
+  const owner = getOwner(event);
   const siteId = event.pathParameters.siteId;
   const Item = JSON.parse(event.body);
   const params = {
     TableName,
-    Key: { id: siteId },
+    Key: { id: siteId, owner },
     Item,
     ReturnValues: 'ALL_OLD',
   };
@@ -53,13 +65,11 @@ exports.put = async (event) => {
 };
 
 exports.delete = async (event) => {
+  const owner = getOwner(event);
   const siteId = event.pathParameters.siteId;
-  if (!siteId) {
-    return unprocessableResponse({ msg: 'Must provide siteID' });
-  }
   const params = {
     TableName,
-    Key: { id: siteId },
+    Key: { id: siteId, owner },
   };
   return jsonResponse(await ddb.delete(params).promise());
 };

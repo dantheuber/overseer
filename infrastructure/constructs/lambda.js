@@ -66,7 +66,7 @@ class LambdaRole extends Construct {
     document.addStatements(new iam.PolicyStatement({
       actions: ['dynamodb:*'],
       effect: iam.Effect.ALLOW,
-      resources: [dbTableArn]
+      resources: [`${dbTableArn}*`]
     }));
     const policy = new iam.Policy(this, 'lambda-policy', {
       policyName: 'overseer-lambda-policy',

@@ -12,8 +12,8 @@ export const getSites = async () => {
   const response = await fetch(`${BASE_API_URL}`, {
     method: 'GET',
     headers: buildAuthHeader(),
-  });
-  return await response.json();;
+  }); 
+  return await response.json();
 };
 
 export const getSite = async (siteId) => {

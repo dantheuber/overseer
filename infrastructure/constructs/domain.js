@@ -11,7 +11,7 @@ class Domain extends Construct {
     const {
       bucket,
       cloudfrontDistribution,
-      authCloudFrontDistribution,
+      // authCloudFrontDistribution,
     } = props;
     const zone = {
       hostedZoneId: process.env.HOSTED_ZONE_ID,
@@ -28,12 +28,12 @@ class Domain extends Construct {
       recordName: process.env.DASHBOARD_DOMAIN.replace(`.${process.env.DOMAIN_NAME}`, ''),
       target: RecordTarget.fromAlias(new CloudFrontTarget(cloudfrontDistribution)),
     });
-    this.authRecord = new RecordSet(this, 'cognito-distribution-record', {
-      zone,
-      recordType: RecordType.CNAME,
-      recordName: 'auth',
-      target: RecordTarget.fromValues(authCloudFrontDistribution),
-    });
+    // this.authRecord = new RecordSet(this, 'cognito-distribution-record', {
+    //   zone,
+    //   recordType: RecordType.CNAME,
+    //   recordName: 'auth',
+    //   target: RecordTarget.fromValues(authCloudFrontDistribution),
+    // });
   }
 
   getDashboardRecord() {
