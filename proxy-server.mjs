@@ -13,9 +13,8 @@ const onRequest = async (client_req, client_res) => {
   });
 
   let body;
-  if (client_req.method === 'POST' || client_req === 'PUT') {
+  if (client_req.method === 'POST' || client_req.method === 'PUT') {
     body = await parseBody(client_req);
-    console.log(body);
   }
   
   try {
