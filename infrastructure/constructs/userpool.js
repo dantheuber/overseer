@@ -128,22 +128,18 @@ class Pool extends Construct {
     });
     this.client.node.addDependency(amazonProvider);
     this.client.node.addDependency(googleProvider);
+    this.client.node.addDependency(this.pool);
 
     this.domain = new UserPoolDomain(this, 'overseer-user-pool-domain', {
       userPool: this.pool,
-      // cognitoDomain: {
-      //   domainPrefix: 'ovrsr',
-      // }
       customDomain: {
         domainName: `auth.${process.env.DOMAIN_NAME}`,
         certificate: Certificate.fromCertificateArn(this, 'userpool-domain-certificate', process.env.ACM_CERT_ARN),
       },
     });
-
-    this.authorizer = new HttpUserPoolAuthorizer({
-      authorizerName: 'user-pool-authorizer',
-      userPool: this.pool,
-      userPoolClients: [this.client],
+    this.domain.node.addDependency(this.pool);
+    this.authorizer = new HttpUserPoolAuthorizer('user-pool-authorizer', this.pool, {
+      userPoolClients: [this.client]
     });
   }
   getPool() {

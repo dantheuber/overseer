@@ -1,25 +1,46 @@
 const fetch = require('node-fetch');
 const {
   getSns,
+  getXray,
   getDynamoClient,
   shouldAlert,
 } = require('./lib/util');
 
 const handler = async (event) => {
+  console.log(event);
+  const xray = getXray();
   const sns = getSns();
   const ddb = getDynamoClient();
+  const facade = xray.getSegment();
+  console.log(facade);
   for await (let item of event.Records) {
     let results;
     const site = JSON.parse(item.body);
+    // new sub-segment for each site
+    const segment = facade.addNewSubsegment(site.id);
+    segment.addAnnotation('site', site.url);
+    segment.addAnnotation('id', site.id);
+    segment.addAnnotation('alerted', site.alerted);
+    console.log('Attempting to fetch site', site.url);
     try {
+      // xray timer for the fetch
+      const startTime = Date.now();
+      segment.addMetadata('start', startTime);
       results = await fetch(site.url);
+      segment.addMetadata('end', Date.now());
+      segment.addMetadata('duration', Date.now() - startTime);
+      segment.addAnnotation('resultStatus', results.status);
     } catch (e) {
       console.log(`error fetching ${site.url}`);
       console.error(e);
+      segment.addAnnotation('error', e.message)
       results = { status: 500, error: e }
     }
     
-    if (shouldAlert(results, site)) {
+    const _shouldAlert = shouldAlert(results, site);
+    segment.addAnnotation('shouldAlert', _shouldAlert);
+
+    if (_shouldAlert) {
       await sns.publish({
         TopicArn: process.env.TOPIC_ARN,
         Message: JSON.stringify({
@@ -71,6 +92,9 @@ const handler = async (event) => {
         },
       }).promise();
     }
+    
+    // close site sub-segment
+    segment.close();
   }
 };
 

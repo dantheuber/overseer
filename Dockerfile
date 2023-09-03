@@ -34,7 +34,7 @@ RUN yarn build
 
 # CDK Infrastructure build
 FROM node:14 AS cdk
-RUN npm install -g aws-cdk
+RUN npm install -g aws-cdk@1.204.0
 
 FROM cdk AS deploy
 WORKDIR /cdk

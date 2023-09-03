@@ -41,6 +41,9 @@ export const SiteModal = ({
   const handleSubmit = async () => {
     const form = formRef.current;
     const isValid = form.checkValidity();
+    if (newSite.alertDiscord && !newSite.discordWebhook) {
+      // need to verify webhook provided if alert discord is enabled
+    }
     setValidated(true);
     if (!isValid) return;
 
@@ -98,13 +101,23 @@ export const SiteModal = ({
           </Form.Group>
           <Form.Group>
             <Form.Label>Notification Methods</Form.Label>
-            <Form.Check
-              label="Discord"
-              type="checkbox"
-              name="alertDiscord"
-              checked={newSite.alertDiscord}
-              onChange={updateSite}
-            />
+            <Form.Group>
+              <Form.Check
+                label="Discord"
+                type="checkbox"
+                name="alertDiscord"
+                checked={newSite.alertDiscord}
+                onChange={updateSite}
+              />
+              <Form.Control
+                type="text"
+                name="discordWebhook"
+                value={newSite.discordWebhook}
+                onChange={updateSite}
+                placeholder="Enter Discord Webhook URL"
+                disabled={!newSite.alertDiscord}
+              />
+            </Form.Group>
             <Form.Text className="text-muted">More coming soon!</Form.Text>
           </Form.Group>
           <Form.Group className="mb-3" controlId="formDescription">

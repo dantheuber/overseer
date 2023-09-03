@@ -1,6 +1,6 @@
 const { Construct } = require("@aws-cdk/core");
 const { HttpApi, HttpMethod } = require('@aws-cdk/aws-apigatewayv2');
-const { LambdaProxyIntegration } = require('@aws-cdk/aws-apigatewayv2-integrations');
+const { HttpLambdaIntegration } = require('@aws-cdk/aws-apigatewayv2-integrations');
 
 class RestApi extends Construct {
   constructor(parent, name, options) {
@@ -19,30 +19,35 @@ class RestApi extends Construct {
       apiName: 'overseer-rest-api',
       defaultAuthorizer,
     });
+    const getSitesIntegration = new HttpLambdaIntegration('get-sites-integration', getFunction);
     this.api.addRoutes({
       path: '/api/sites',
       methods: [HttpMethod.GET],
-      integration: new LambdaProxyIntegration({ handler: getFunction }),
+      integration: getSitesIntegration,
     });
+    const getSiteByIdIntegration = new HttpLambdaIntegration('get-site-integration', getSiteFunction);
     this.api.addRoutes({
       path: '/api/sites/{siteId}',
       methods: [HttpMethod.GET],
-      integration: new LambdaProxyIntegration({ handler: getSiteFunction }),
+      integration: getSiteByIdIntegration,
     });
+    const postSiteIntegration = new HttpLambdaIntegration('post-site-integration', postFunction);
     this.api.addRoutes({
       path: '/api/sites',
       methods: [HttpMethod.POST],
-      integration: new LambdaProxyIntegration({ handler: postFunction }),
+      integration: postSiteIntegration,
     });
+    const putSiteIntegration = new HttpLambdaIntegration('put-site-integration', putFunction);
     this.api.addRoutes({
       path: '/api/sites/{siteId}',
       methods: [HttpMethod.PUT],
-      integration: new LambdaProxyIntegration({ handler: putFunction }),
+      integration: putSiteIntegration,
     });
+    const deleteSiteIntegration = new HttpLambdaIntegration('delete-site-integration', deleteFunction);
     this.api.addRoutes({
       path: '/api/sites/{siteId}',
       methods: [HttpMethod.DELETE],
-      integration: new LambdaProxyIntegration({ handler: deleteFunction }),
+      integration: deleteSiteIntegration,
     });
   }
 

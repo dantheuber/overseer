@@ -1,5 +1,18 @@
 const fetch = require('node-fetch');
-const AWS = require('aws-sdk');
+const AWSXray = require('aws-xray-sdk');
+// capture AWS SDK calls
+const AWS = AWSXray.captureAWS(require('aws-sdk'));
+
+AWSXray.enableAutomaticMode();
+
+const handleMissingContextStrategy = (...props) => {
+  console.log('Context missing strategy');
+  console.log(props);
+};
+
+AWSXray.setContextMissingStrategy(handleMissingContextStrategy);
+
+const getXray = () => AWSXray;
 
 let ddb;
 const getDynamoClient = () => {
@@ -93,5 +106,6 @@ module.exports = {
   getDynamoClient,
   getSqs,
   getSns,
+  getXray,
   timeSince,
 };

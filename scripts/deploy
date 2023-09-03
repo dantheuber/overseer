@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker-compose build
-docker-compose run cdk deploy --all --require-approval never
+docker compose build
+docker compose run cdk deploy --all --require-approval never --profile personal
