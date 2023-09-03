@@ -1,46 +1,35 @@
 const fetch = require('node-fetch');
 const {
-  getSns,
   getXray,
+  getSns,
   getDynamoClient,
   shouldAlert,
+  marshall,
 } = require('./lib/util');
 
-const handler = async (event) => {
-  console.log(event);
-  const xray = getXray();
+const handler = async (event, context) => {
   const sns = getSns();
   const ddb = getDynamoClient();
-  const facade = xray.getSegment();
-  console.log(facade);
+
+  const facade = getXray().getSegment();
+  facade.addMetadata('records-processed', event.Records.length);
+  let num_alerted = 0;
   for await (let item of event.Records) {
     let results;
     const site = JSON.parse(item.body);
-    // new sub-segment for each site
-    const segment = facade.addNewSubsegment(site.id);
-    segment.addAnnotation('site', site.url);
-    segment.addAnnotation('id', site.id);
-    segment.addAnnotation('alerted', site.alerted);
-    console.log('Attempting to fetch site', site.url);
+    
     try {
-      // xray timer for the fetch
-      const startTime = Date.now();
-      segment.addMetadata('start', startTime);
       results = await fetch(site.url);
-      segment.addMetadata('end', Date.now());
-      segment.addMetadata('duration', Date.now() - startTime);
-      segment.addAnnotation('resultStatus', results.status);
     } catch (e) {
       console.log(`error fetching ${site.url}`);
       console.error(e);
-      segment.addAnnotation('error', e.message)
       results = { status: 500, error: e }
     }
     
     const _shouldAlert = shouldAlert(results, site);
-    segment.addAnnotation('shouldAlert', _shouldAlert);
 
     if (_shouldAlert) {
+      num_alerted = num_alerted + 1;
       await sns.publish({
         TopicArn: process.env.TOPIC_ARN,
         Message: JSON.stringify({
@@ -64,38 +53,32 @@ const handler = async (event) => {
     }
 
     if (!site.alerted && results.status >= 500) {
-      return await ddb.update({
+      const Item = marshall({
+        ...site,
+        downTime: Date.now(),
+      });
+      return await ddb.putItem({
         TableName: process.env.TABLE_NAME,
-        Key: { id: site.id },
-        UpdateExpression: 'set #downTime = :dt',
-        ExpressionAttributeNames: {
-          '#downTime': 'downTime'
-        },
-        ExpressionAttributeValues: {
-          ':dt': Date.now(),
-        },
+        Item,
         ReturnValue: 'UPDATED_NEW',
       }).promise();
     }
 
     // if its a new site with no status and it is up, we should set it as such
     if (!site.status) {
-      return await ddb.update({
+      const Item = marshall({
+        ...site,
+        status: 'up',
+      })
+      return await ddb.putItem({
         TableName: process.env.TABLE_NAME,
-        Key: { id: site.id },
-        UpdateExpression: 'set #st = :st',
-        ExpressionAttributeNames: {
-          '#st': 'status',
-        },
-        ExpressionAttributeValues: {
-          ':st': 'up',
-        },
+        Item,
+        ReturnValue: 'UPDATED_NEW',
       }).promise();
     }
-    
-    // close site sub-segment
-    segment.close();
+    facade.addMetadata('sites-alerted', num_alerted);
   }
+  facade.close();
 };
 
 module.exports = {

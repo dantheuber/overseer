@@ -1,86 +1,102 @@
 const { uuid } = require('uuidv4');
-const { getDynamoClient } = require('./lib/util');
+const { getDynamoClient, getXray, marshall, unmarshall } = require('./lib/util');
 const { jsonResponse } = require('./lib/apig');
 const { DEFAULT_NEW_SITE } = require('./constants');
 
 const TableName = process.env.TABLE_NAME;
 const ddb = getDynamoClient();
+const xray = getXray();
 
 const getOwner = event => event.requestContext.authorizer.jwt.claims.sub;
 
 exports.getSite = async (event) => {
+  const facade = xray.getSegment();
+  console.log('trace-id', facade.trace_id);
   const owner = getOwner(event);
   const siteId = event.pathParameters.siteId;
   const params = {
     TableName,
-    Key: { id: siteId, owner },
+    Key: {
+      id: {
+        S: siteId
+      },
+      owner: {
+        S: owner
+      }
+    },
   };
-  return jsonResponse(await ddb.query(params).promise());
+  const result = unmarshall(await ddb.query(params).promise());
+  return jsonResponse(result);
 };
 
 exports.get = async (event) => {
+  const facade = xray.getSegment();
+  console.log('trace-id', facade.trace_id);
   const owner = getOwner(event);
   const params = {
     TableName,
     IndexName: 'owner',
-    KeyConditionExpression: '#owner = :owner',
+    KeyConditionExpression: '#o = :o',
     ExpressionAttributeValues: {
-      ':owner': owner,
+      ':o': { S: owner },
     },
     ExpressionAttributeNames: {
-      '#owner': 'owner',
+      '#o': 'owner',
     }
   };
-  return jsonResponse(await ddb.query(params).promise());
+  const Items = (await ddb.query(params).promise()).Items.map(unmarshall);
+  return jsonResponse({ Items });
 };
 
 exports.post = async (event) => {
+  const facade = xray.getSegment();
+  console.log('trace-id', facade.trace_id);
   const owner = getOwner(event);
   const body = JSON.parse(event.body);
-  const Item = {
+  const Item = marshall({
     id: uuid(),
+    status: 'up',
     owner,
     ...DEFAULT_NEW_SITE,
     ...body,
-  };
+  });
   const params = {
     TableName,
     Item,
     ReturnValues: 'ALL_OLD',
   };
-  return jsonResponse(await ddb.put(params).promise().then((() => ({ ...Item }))));
+  return jsonResponse(unmarshall(await ddb.putItem(params).promise().then((() => ({ ...Item })))));
 };
 
 exports.put = async (event) => {
+  const facade = xray.getSegment();
+  console.log('trace-id', facade.trace_id);
   const owner = getOwner(event);
   const siteId = event.pathParameters.siteId;
-  const Item = JSON.parse(event.body);
+  const Item = marshall(JSON.parse(event.body));
   const params = {
     TableName,
-    Key: { id: siteId, owner },
     Item,
     ReturnValues: 'ALL_OLD',
   };
-  return jsonResponse(await ddb.put(params).promise().then((() => ({ ...Item }))));
+  return jsonResponse(unmarshall(await ddb.putItem(params).promise().then((() => ({ ...Item })))));
 };
 
 exports.delete = async (event) => {
+  const facade = xray.getSegment();
+  console.log('trace-id', facade.trace_id);
   const owner = getOwner(event);
   const siteId = event.pathParameters.siteId;
   const params = {
     TableName,
-    Key: { id: siteId, owner },
+    Key: {
+      id: {
+        S: siteId,
+      },
+      owner: {
+        S: owner,
+      }
+    },
   };
-  return jsonResponse(await ddb.delete(params).promise());
+  return jsonResponse(await ddb.deleteItem(params).promise());
 };
-
-exports.callback = async (event) => {
-  console.log(event);
-  return jsonResponse({
-    statusCode: 200,
-    body: JSON.stringify({
-      message: 'Hello from Lambda!',
-      input: event,
-    }),
-  });
-}

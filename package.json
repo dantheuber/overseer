@@ -42,10 +42,11 @@
     "@aws-cdk/aws-ssm": "^1.204.0",
     "@aws-cdk/core": "^1.204.0",
     "aws-cdk": "^1.204.0",
-    "aws-sdk": "^2.1009.0",
     "dotenv": "^10.0.0"
   },
   "dependencies": {
+    "@aws-cdk/aws-xray": "^1.204.0",
+    "aws-sdk": "^2.1009.0",
     "aws-xray-sdk": "^3.5.1",
     "node-fetch": "^2.0.0",
     "uuidv4": "^6.2.12"

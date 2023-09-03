@@ -745,6 +745,13 @@
     "@aws-cdk/core" "1.204.0"
     constructs "^3.3.69"
 
+"@aws-cdk/aws-xray@^1.204.0":
+  version "1.204.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-xray/-/aws-xray-1.204.0.tgz#fd2c07121823e62bbaa6633b90b0aa9f75bee03a"
+  integrity sha512-Cl7rerIkN7KvZLYjGqBdYXHtVgxJrDWu+KXM7rAWpfWaoxWk4Xx+q21XcLC/owUxil4Awgtz8np6nfIBWFw99w==
+  dependencies:
+    "@aws-cdk/core" "1.204.0"
+
 "@aws-cdk/cloud-assembly-schema@1.204.0":
   version "1.204.0"
   resolved "https://registry.yarnpkg.com/@aws-cdk/cloud-assembly-schema/-/cloud-assembly-schema-1.204.0.tgz#2d9f44ad764b0700b334dd3392c573d06a3f9045"

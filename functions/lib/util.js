@@ -1,7 +1,7 @@
-const fetch = require('node-fetch');
 const AWSXray = require('aws-xray-sdk');
-// capture AWS SDK calls
 const AWS = AWSXray.captureAWS(require('aws-sdk'));
+
+const fetch = require('node-fetch');
 
 AWSXray.enableAutomaticMode();
 
@@ -17,7 +17,7 @@ const getXray = () => AWSXray;
 let ddb;
 const getDynamoClient = () => {
   if (!ddb) {
-    ddb = new AWS.DynamoDB.DocumentClient();
+    ddb = new AWS.DynamoDB();
   }
   return ddb;
 };
@@ -75,6 +75,9 @@ const minAgo = (min = 10) => {
   return new Date(now.getTime() - min*60000).getTime();
 };
 
+const unmarshall = (item) => AWS.DynamoDB.Converter.unmarshall(item);
+const marshall = (item) => AWS.DynamoDB.Converter.marshall(item);
+
 const shouldAlert = (results, site) =>
   (results.status >= 500 && (!site.alerted || site.alertedTime <= minAgo(site.minBetweenAlerts)))
   || (site.status === 'down' && results.status < 500);
@@ -108,4 +111,6 @@ module.exports = {
   getSns,
   getXray,
   timeSince,
+  unmarshall,
+  marshall,
 };

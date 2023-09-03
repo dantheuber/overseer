@@ -1,5 +1,5 @@
 const { Construct, Duration } = require('@aws-cdk/core');
-const { Function, Code, Runtime } = require('@aws-cdk/aws-lambda');
+const { Function, Code, Runtime, Tracing } = require('@aws-cdk/aws-lambda');
 const { LambdaSubscription } = require('@aws-cdk/aws-sns-subscriptions');
 const { SqsEventSource } = require('@aws-cdk/aws-lambda-event-sources');
 const { LambdaFunction } = require('@aws-cdk/aws-events-targets');
@@ -93,6 +93,7 @@ class OverseerLambda extends Construct {
       runtime: Runtime.NODEJS_14_X,
       logRetention: RetentionDays.ONE_MONTH,
       environment,
+      tracing: Tracing.ACTIVE,
       role,
       ...defaultOptions,
     });
@@ -123,17 +124,20 @@ class ScheduledLambda extends Construct {
     this.functionName = `overseer-${lambdaName}`;
 
     this.lambda = new Function(this, name, {
+      functionName: this.functionName,
       code: Code.fromAsset(path.join(__dirname, `../../functions/${lambdaName}`)),
       handler: 'index.handler',
       runtime: Runtime.NODEJS_14_X,
       environment,
+      tracing: Tracing.ACTIVE,
       role,
       ...defaultOptions,
     });
 
     this.eventRule = new Rule(this, `${this.functionName}-eventrule`, {
       schedule: Schedule.expression(`rate(${rate})`),
-      targets: [new LambdaFunction(this.lambda)]
+      targets: [new LambdaFunction(this.lambda)],
+      enabled: true,
     });
   }
   getLambda() {

@@ -10,6 +10,7 @@ const { ScheduledLambda, LambdaRole, OverseerLambda } = require('../constructs/l
 const { Domain } = require('../constructs/domain');
 const { RestApi } = require('../constructs/api');
 const { Pool } = require('../constructs/userpool');
+const { XrayGroup } = require('../constructs/xray');
 
 class App extends Stack {
   constructor(scope, id, props) {
@@ -25,6 +26,8 @@ class App extends Stack {
 
     const database = new Database(this, 'overseer-db', { tableName, env });
     const table = database.getTable();
+
+    // const xrayGroup = new XrayGroup(this, 'xray-group', { env });
 
     const lambdaRole = new LambdaRole(this, 'role', {
       env,

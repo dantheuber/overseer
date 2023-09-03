@@ -1,4 +1,9 @@
-const { alertDiscord, getDynamoClient, timeSince } = require('./lib/util');
+const {
+  alertDiscord,
+  getDynamoClient,
+  timeSince,
+  marshall,
+} = require('./lib/util');
 
 const handler = async (event) => {
   const ddb = getDynamoClient();
@@ -24,22 +29,16 @@ const handler = async (event) => {
         );
       }
     }
-
-    await ddb.update({
+    const Item = marshall({
+      ...parsed.site,
+      status,
+      alerted,
+      alertedTime,
+    });
+    await ddb.putItem({
       TableName: process.env.TABLE_NAME,
-      Key: { id: parsed.site.id },
-      UpdateExpression: 'set #status = :st, #alerted = :alt, #alertedTime = :altTime',
-      ExpressionAttributeNames: {
-        '#status': 'status',
-        '#alerted': 'alerted',
-        '#alertedTime': 'alertedTime',
-      },
-      ExpressionAttributeValues: {
-        ':st': status,
-        ':alt': alerted,
-        ':altTime': alertedTime,
-      },
-      ReturnValue: 'UPDATED_NEW',
+      Item,
+      ReturnValues: 'ALL_OLD'
     }).promise();
   }
 };
